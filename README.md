@@ -1,56 +1,49 @@
-# Welcome to your Expo app 👋
+# SahajTest Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+SahajTest Mobile is an Expo SDK 57 application. It is currently at **Frontend Phase 0: Foundation and Contract Harness**. This repository contains only the application foundation: stack route boundaries, visual design-system primitives, public environment validation, a generic unauthenticated Fetch client, linting, and unit-test infrastructure. Product workflows are not implemented.
 
-## Get started
+## Prerequisites
 
-1. Install dependencies
+Use the repository-pinned Node/npm toolchain and Node 24+ with npm 11+ for local work. Install dependencies with `npm install`.
 
-   ```bash
-   npm install
-   ```
+## Environment configuration
 
-2. Start the app
+Copy `.env.example` to `.env` and set the public development value:
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```text
+EXPO_PUBLIC_API_URL=http://10.0.2.2:8000/api/v1
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+`10.0.2.2` is the Android emulator alias for the host machine. `EXPO_PUBLIC_*` values are embedded in the client application: never put secrets in them. The application validates that the URL is absolute HTTP(S), removes trailing slashes, and requires HTTPS in production. There is intentionally no production fallback URL.
 
-### Other setup steps
+## Development and verification
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Start Metro for the existing development client with:
 
-## Learn more
+```bash
+npx expo start --dev-client
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Other checks:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm run typecheck
+npm run lint
+npm run test:ci
+npx expo export --platform android
+npx expo export --platform web
+```
 
-## Join the community
+The Android/iOS commands retain the existing development-client workflow. No native prebuild or EAS build is required for this Phase 0 foundation.
 
-Join our community of developers creating universal apps.
+## Router and design system
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The public route is intentionally a minimal Phase 0 verification screen. `(onboarding)`, `(protected)`, and `(workflow)` are Stack boundaries closed through Expo Router protected routes; they do not model authentication or product state. The design system exposes only `AppText`, `Surface`, `Screen`, and `Button`, using the SahajTest v1 system color scheme and typography roles.
+
+## Backend contract status
+
+`Docs/schema.yml` remains the machine-readable backend reference and `Docs/frontend-api-handoff.md` remains the human integration handoff. Known discrepancies are tracked in [the Contract Issues Register](Docs/frontend-contract-issues.md). No domain endpoint wrappers or response DTOs are created until those discrepancies are resolved.
+
+### OpenAPI generation: deferred
+
+**BLOCKED BY UPSTREAM TOOL COMPATIBILITY.** Stable `openapi-typescript` 7.13.0 declares a TypeScript `^5.x` peer dependency, while this project uses TypeScript 6.0.3. Contract generation, generated API types, freshness scripts, and the freshness test are deliberately deferred. No forced peer resolution, TypeScript downgrade, placeholder output, or substitute generator was used. Revisit this once a stable TypeScript-6-compatible release is available or a separate generator decision is approved.

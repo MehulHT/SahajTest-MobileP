@@ -1,0 +1,4 @@
+export type ApiErrorKind = 'cancelled' | 'http' | 'network' | 'response';
+export type ApiErrorOptions = { kind: ApiErrorKind; status?: number; code?: string; detail: string; fieldErrors?: Record<string, string[]>; requestId?: string; retriable: boolean; cause?: unknown };
+export class ApiError extends Error { readonly kind; readonly status?; readonly code?; readonly fieldErrors?; readonly requestId?; readonly retriable; constructor(options: ApiErrorOptions) { super(options.detail, { cause: options.cause }); this.name = 'ApiError'; this.kind = options.kind; this.status = options.status; this.code = options.code; this.fieldErrors = options.fieldErrors; this.requestId = options.requestId; this.retriable = options.retriable; } }
+export function isApiError(error: unknown): error is ApiError { return error instanceof ApiError; }

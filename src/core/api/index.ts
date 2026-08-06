@@ -1,0 +1,2 @@
+export { createApiClient } from './client'; export type { ApiClientOptions, ApiRequestOptions } from './client';
+export { ApiError, isApiError } from './error'; export type { ApiErrorKind, ApiErrorOptions } from './error';
