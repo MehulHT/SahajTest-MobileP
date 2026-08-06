@@ -59,8 +59,11 @@ export const API_BASE_URL = getBaseUrl();
 
 ### 2.1 User Roles
 ```typescript
-export type UserRole = 'STUDENT' | 'TEACHER' | 'PROFESSIONAL' | 'ADMIN';
+export type PublicUserRole = 'STUDENT' | 'TEACHER' | 'PROFESSIONAL';
+export type UserRole = PublicUserRole | 'ADMIN';
 ```
+* **Public Registration Roles**: Self-registration supports `STUDENT`, `TEACHER`, and `PROFESSIONAL`.
+* **ADMIN Role Safety**: `ADMIN` role is strictly prohibited during public self-registration. Submitting `role: "ADMIN"` returns `400 Bad Request`.
 
 ### 2.2 Endpoints
 
@@ -84,8 +87,9 @@ export type UserRole = 'STUDENT' | 'TEACHER' | 'PROFESSIONAL' | 'ADMIN';
     "target_score_goal": 680
   }
   ```
-* **Required Fields**: `username`, `email`, `password`
-* **Optional Fields**: `first_name`, `last_name`, `role` (default: `"STUDENT"`), `phone_number`, `target_exam` (default: `"NEET"`), `medium` (default: `"ENGLISH"`), `target_year`, `target_score_goal`
+* **Required Client Request Fields**: `username`, `email`, `password`
+* **Optional Client Request Fields**: `first_name`, `last_name`, `role` (`"STUDENT"` | `"TEACHER"` | `"PROFESSIONAL"`, default: `"STUDENT"`), `phone_number`, `target_exam` (default: `"NEET"`), `medium` (default: `"ENGLISH"`), `target_year`, `target_score_goal`
+* **Read-Only / Server-Assigned Fields**: `id` is server-assigned and excluded from the public request schema.
 * **Success Status**: `201 Created`
 * **Success Response**:
   ```json
@@ -118,7 +122,7 @@ export type UserRole = 'STUDENT' | 'TEACHER' | 'PROFESSIONAL' | 'ADMIN';
     "code": "invalid_input",
     "errors": {
       "email": ["A user with this email address already exists."],
-      "password": ["This password is too short. It must contain at least 8 characters."]
+      "role": ["Administrative role cannot be self-selected during public registration."]
     }
   }
   ```
@@ -143,6 +147,9 @@ export type UserRole = 'STUDENT' | 'TEACHER' | 'PROFESSIONAL' | 'ADMIN';
   }
   ```
 * **Token Claims Injected**: Access JWT contains `user_id`, `username`, `role`, `target_exam`, `medium`.
+* **Error Statuses**:
+  * `400 Bad Request`: Missing `username` or `password` (`{"username": ["This field is required."], "password": ["This field is required."]}`).
+  * `401 Unauthorized`: Invalid credentials (`{"detail": "No active account found with the given credentials", "code": "no_active_account"}`).
 
 #### 3. Refresh Access Token
 * **Method**: `POST`
@@ -161,6 +168,10 @@ export type UserRole = 'STUDENT' | 'TEACHER' | 'PROFESSIONAL' | 'ADMIN';
     "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   }
   ```
+* **Token Rotation Policy**: Refresh token rotation is disabled (`ROTATE_REFRESH_TOKENS = False`). Exchanging a valid refresh token yields a new 60-minute access token; the submitted refresh token remains valid until its 24-hour expiration or until revoked via logout.
+* **Error Statuses**:
+  * `400 Bad Request`: Missing `refresh` field (`{"refresh": ["This field is required."]}`).
+  * `401 Unauthorized`: Invalid, expired, or blacklisted token (`{"detail": "Token is invalid or expired", "code": "token_not_valid"}`).
 
 #### 4. Verify Access Token
 * **Method**: `POST`
@@ -169,7 +180,30 @@ export type UserRole = 'STUDENT' | 'TEACHER' | 'PROFESSIONAL' | 'ADMIN';
 * **Request Payload**: `{"token": "eyJhbGci..."}`
 * **Success Status**: `200 OK` (`{}`)
 
-#### 5. Retrieve / Update User Profile
+#### 5. Logout & Revoke Refresh Token
+* **Method**: `POST`
+* **Path**: `/api/v1/auth/logout/`
+* **Authentication**: Required (`Bearer <access_token>`)
+* **Request Payload**:
+  ```json
+  {
+    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+  ```
+* **Success Status**: `200 OK`
+  ```json
+  {
+    "detail": "Successfully logged out.",
+    "code": "logout_success"
+  }
+  ```
+* **Error Status**: `400 Bad Request` (`{"detail": "Refresh token is required.", "code": "token_required"}` or `{"detail": "Invalid or expired refresh token.", "code": "token_invalid"}`).
+* **Revocation Semantics**:
+  1. Blacklists the submitted refresh token immediately, preventing its reuse at `/api/v1/auth/refresh/`.
+  2. Already-issued access tokens remain valid until their configured 60-minute expiration (`ACCESS_TOKEN_LIFETIME = 60 minutes`).
+  3. Single-device refresh token revocation only (does not revoke all active user devices/sessions). Client must discard stored tokens locally from SecureStore.
+
+#### 6. Retrieve / Update User Profile
 * **Method**: `GET` / `PATCH`
 * **Path**: `/api/v1/auth/profile/`
 * **Authentication**: Required (`Bearer <access_token>`)
@@ -184,11 +218,11 @@ export type UserRole = 'STUDENT' | 'TEACHER' | 'PROFESSIONAL' | 'ADMIN';
   ```
 * **Success Status**: `200 OK` (Returns complete `UserProfile` object)
 
-#### 6. Learner Academic Profile & Exploration Context Switch
-* **Get Profile**: `GET /api/v1/auth/learner/academic-profile/` (or `/api/v1/learner/academic-profile/`)
-* **Set Primary Curriculum**: `PATCH /api/v1/auth/learner/academic-profile/` (`{"curriculum_version_id": "UUID"}`)
-* **Switch Active Exploration Context**: `POST /api/v1/auth/learner/academic-profile/switch-context/` (`{"curriculum_version_id": "UUID"}`)
-* **Logout**: `NOT IMPLEMENTED / FUTURE WORK` (Client must discard tokens locally from SecureStore).
+#### 7. Learner Academic Profile & Exploration Context Switch
+* **Canonical Path**: `/api/v1/learner/academic-profile/`
+* **Get Profile**: `GET /api/v1/learner/academic-profile/`
+* **Set Primary Curriculum**: `PATCH /api/v1/learner/academic-profile/` (`{"curriculum_version_id": "UUID"}`)
+* **Switch Active Exploration Context**: `POST /api/v1/learner/academic-profile/switch-context/` (`{"curriculum_version_id": "UUID"}`)
 
 ---
 

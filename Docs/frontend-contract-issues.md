@@ -6,17 +6,14 @@ This register tracks known backend-contract discrepancies. The frontend must not
 Schema: POST only. Handoff: list GET. Impact: no safe integration. Severity: **BLOCKING**. Required: canonical operation/schema. Blocks: onboarding.
 
 ## CI-02 — Learner academic profile
-Schema: no explicit response schema. Handoff: profile behavior. Impact: cannot type profile. Severity: **BLOCKING**. Required: response schema. Blocks: onboarding and academic context.
-
+Resolved - Backend Batch A.1 finalization, merged develop commit `df75e4dadf92f0803b7179208336aacca42a43e5`. `GET /api/v1/learner/academic-profile/` returns the explicit `LearnerAcademicProfile` schema; the handoff identifies this canonical endpoint. Evidence: merged OpenAPI `LearnerAcademicProfile` and handoff section 2.2.7. Former impact: no typed profile response. Unblocked: academic-profile contract typing; the profile remains non-blocking for Phase 1 routing.
 ## CI-03 — Academic profile route
-Schema: emits both `/auth/learner/academic-profile/` and `/learner/academic-profile/`. Handoff: canonical route unclear. Impact: routing ambiguity. Severity: **IMPORTANT**. Required: canonical route. Blocks: onboarding integration clarity.
-
+Resolved - Backend Batch A.1 finalization, merged develop commit `df75e4dadf92f0803b7179208336aacca42a43e5`. Schema and handoff expose only `/api/v1/learner/academic-profile/`; `/api/v1/auth/learner/academic-profile/` is absent. Evidence: merged OpenAPI paths and handoff section 2.2.7. Unblocked: canonical learner-profile route selection.
 ## CI-04 — Multi-target learner collection
 Schema: no collection. Handoff: multi-exam intent. Impact: cannot model targets. Severity: **BLOCKING**. Required: collection contract. Blocks: multi-exam onboarding.
 
 ## CI-05 — Public registration roles
-Schema: includes ADMIN. Handoff: reports ADMIN self-registration fixed. Impact: unsafe public role contract. Severity: **BLOCKING until regenerated/verified**. Required: confirm safe public-role contract. Blocks: Authentication.
-
+Resolved - Backend Batch A.1 finalization, merged develop commit `df75e4dadf92f0803b7179208336aacca42a43e5`. `UserRegistrationRequest` explicitly excludes server-assigned `id` and requires only `username`, `email`, and `password`. `UserRegistrationRequestRoleEnum` permits only `STUDENT`, `TEACHER`, and `PROFESSIONAL`; the handoff states `ADMIN` is rejected with HTTP 400. `RegistrationResponse` remains typed as `user` plus `tokens`. Evidence: `POST /api/v1/auth/register/`, request/response schemas, and handoff sections 2.1-2.2.1. Unblocked: public registration typing.
 ## CI-06 — Active academic context
 Schema/handoff: feed, practice search, mastery, analytics behavior not explicit. Impact: context cannot be applied consistently. Severity: **BLOCKING**. Required: active-context rules. Blocks: Student Core.
 
@@ -69,8 +66,7 @@ Schema: mutation responses incomplete. Handoff: reconciliation needs data. Impac
 Schema/handoff: no contract for non-idempotent attempt operations. Impact: retries unsafe. Severity: **IMPORTANT**. Required: idempotency agreement. Blocks: safe retries in Practice and Tests.
 
 ## CI-23 — Logout/revocation
-Schema: no logout or refresh-token revocation. Impact: server-side forced logout/security hardening unavailable. Severity: **IMPORTANT**. Required: revocation endpoint clarification. Blocks: server-side forced logout/security hardening, not local logout.
-
+Resolved - Backend Batch A.1 finalization, merged develop commit `df75e4dadf92f0803b7179208336aacca42a43e5`. `POST /api/v1/auth/logout/` requires bearer authentication and `Logout.refresh`, then blacklists the submitted refresh token; `LogoutSuccessResponse` is typed. Refresh request/response typing is finalized as `TokenRefreshRequest` (`refresh`) and `TokenRefreshResponse` (`access`); rotation is disabled and no new refresh token is returned. The handoff confirms already-issued access tokens remain valid for their 60-minute lifetime and logout is single-device revocation. Evidence: merged schema paths/components and handoff sections 2.2.3 and 2.2.5. Unblocked: refresh-token revocation and server-side logout hardening.
 ## CI-24 — Teacher capabilities
 Schema/handoff: authoring permissions/capabilities absent. Impact: UI cannot be gated correctly. Severity: **BLOCKING**. Required: capability contract. Blocks: Teacher workflows.
 

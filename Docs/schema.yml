@@ -443,69 +443,6 @@ paths:
           description: ''
         '404':
           description: Version not found.
-  /api/v1/auth/learner/academic-profile/:
-    get:
-      operationId: v1_auth_learner_academic_profile_retrieve
-      description: Returns student primary curriculum target version and active exploration
-        context.
-      summary: Retrieve learner academic profile
-      tags:
-      - v1
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          description: Learner profile details.
-    patch:
-      operationId: v1_auth_learner_academic_profile_partial_update
-      description: Sets student primary curriculum target. Automatically initializes
-        active exploration context if unset.
-      summary: Set primary curriculum target version
-      tags:
-      - v1
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedSetPrimaryCurriculumVersionRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedSetPrimaryCurriculumVersionRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedSetPrimaryCurriculumVersionRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          description: Learner profile details.
-        '400':
-          description: Bad Request.
-  /api/v1/auth/learner/academic-profile/switch-context/:
-    post:
-      operationId: v1_auth_learner_academic_profile_switch_context_create
-      description: Switches learner active curriculum context without modifying their
-        primary target.
-      summary: Switch active curriculum exploration context
-      tags:
-      - v1
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SwitchActiveContextRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SwitchActiveContextRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SwitchActiveContextRequest'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          description: Updated learner profile details.
   /api/v1/auth/login/:
     post:
       operationId: v1_auth_login_create
@@ -538,7 +475,37 @@ paths:
         '400':
           description: Bad Request - Missing username or password.
         '401':
-          description: Unauthorized - Invalid credentials.
+          description: Unauthorized - Invalid credentials provided.
+  /api/v1/auth/logout/:
+    post:
+      operationId: v1_auth_logout_create
+      description: Blacklists the submitted refresh token, preventing its future reuse.
+      summary: Logout user and revoke refresh token
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Logout'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutSuccessResponse'
+          description: ''
+        '400':
+          description: Invalid, missing, or blacklisted refresh token.
   /api/v1/auth/profile/:
     get:
       operationId: v1_auth_profile_retrieve
@@ -592,30 +559,35 @@ paths:
   /api/v1/auth/refresh/:
     post:
       operationId: v1_auth_refresh_create
-      description: |-
-        Takes a refresh type JSON web token and returns an access type JSON web
-        token if the refresh token is valid.
+      description: 'Exchanges a valid refresh token for a new 60-minute access token.
+        Note: Refresh token rotation is disabled; the original refresh token remains
+        valid until its 24-hour expiration or until revoked via logout.'
+      summary: Refresh JWT access token
       tags:
       - v1
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TokenRefresh'
+              $ref: '#/components/schemas/TokenRefreshRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TokenRefresh'
+              $ref: '#/components/schemas/TokenRefreshRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TokenRefresh'
+              $ref: '#/components/schemas/TokenRefreshRequest'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenRefresh'
+                $ref: '#/components/schemas/TokenRefreshResponse'
           description: ''
+        '400':
+          description: Bad Request - Missing refresh token field.
+        '401':
+          description: Unauthorized - Invalid, expired, or blacklisted refresh token.
   /api/v1/auth/register/:
     post:
       operationId: v1_auth_register_create
@@ -628,13 +600,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRegistration'
+              $ref: '#/components/schemas/UserRegistrationRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/UserRegistration'
+              $ref: '#/components/schemas/UserRegistrationRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UserRegistration'
+              $ref: '#/components/schemas/UserRegistrationRequest'
         required: true
       security:
       - jwtAuth: []
@@ -676,6 +648,211 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenVerify'
           description: ''
+  /api/v1/classrooms/:
+    get:
+      operationId: v1_classrooms_list
+      description: Retrieve classrooms owned by teacher/admin or enrolled by student.
+      summary: List user classrooms
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Classroom'
+          description: ''
+    post:
+      operationId: v1_classrooms_create
+      description: Create a new classroom group (Teachers or Admins only).
+      summary: Create classroom
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClassroom'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateClassroom'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateClassroom'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '211':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Classroom'
+          description: ''
+        '400':
+          description: Validation error
+  /api/v1/classrooms/{id}/:
+    get:
+      operationId: v1_classrooms_retrieve
+      description: Retrieve detail for a classroom if user is owner, enrolled student,
+        or admin.
+      summary: Get classroom detail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Classroom'
+          description: ''
+  /api/v1/classrooms/{id}/assignments/:
+    get:
+      operationId: v1_classrooms_assignments_list
+      description: Retrieve assignments created for a specific classroom.
+      summary: List classroom assignments
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClassroomAssignment'
+          description: ''
+    post:
+      operationId: v1_classrooms_assignments_create
+      description: Assign a published PaperVersion to a classroom with schedule window.
+      summary: Create classroom assignment
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClassroomAssignment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateClassroomAssignment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateClassroomAssignment'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '211':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassroomAssignment'
+          description: ''
+  /api/v1/classrooms/{id}/assignments/{assignment_id}/report/:
+    get:
+      operationId: v1_classrooms_assignments_report_retrieve
+      description: Retrieve factual roster submission breakdown & score stats (Teachers/Admins
+        only).
+      summary: Get operational assignment report
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Operational report dictionary
+  /api/v1/classrooms/{id}/roster/:
+    get:
+      operationId: v1_classrooms_roster_list
+      description: Retrieve full roster member identities (Teachers/Admins only).
+      summary: Get classroom roster
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClassroomRosterMember'
+          description: ''
+  /api/v1/classrooms/join/:
+    post:
+      operationId: v1_classrooms_join_create
+      description: Enroll student into a classroom using an 8-character invite code.
+      summary: Join classroom
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinClassroom'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JoinClassroom'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JoinClassroom'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Enrolled successfully
   /api/v1/learner/academic-profile/:
     get:
       operationId: v1_learner_academic_profile_retrieve
@@ -688,7 +865,11 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: Learner profile details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerAcademicProfile'
+          description: ''
     patch:
       operationId: v1_learner_academic_profile_partial_update
       description: Sets student primary curriculum target. Automatically initializes
@@ -711,7 +892,11 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: Learner profile details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerAcademicProfile'
+          description: ''
         '400':
           description: Bad Request.
   /api/v1/learner/academic-profile/switch-context/:
@@ -739,6 +924,43 @@ paths:
       responses:
         '200':
           description: Updated learner profile details.
+  /api/v1/learner/assignments/:
+    get:
+      operationId: v1_learner_assignments_list
+      description: Retrieve active classroom assignments for enrolled student.
+      summary: List assigned papers
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClassroomAssignment'
+          description: ''
+  /api/v1/learner/assignments/{id}/start-attempt/:
+    post:
+      operationId: v1_learner_assignments_start_attempt_create
+      description: Initialize or resume a PaperAttempt for a classroom assignment.
+      summary: Start assignment attempt
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: Attempt created/resumed
   /api/v1/learner/paper-attempts/{attempt_id}/:
     get:
       operationId: v1_learner_paper_attempts_retrieve
@@ -2488,6 +2710,219 @@ components:
       - name
       - sub_topics
       - subject
+    Classroom:
+      type: object
+      description: Serializer for classroom details with safe aggregate member count
+        for students.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          readOnly: true
+          description: Unique invite code for student enrollment.
+        description:
+          type: string
+        owner:
+          type: integer
+          readOnly: true
+        owner_username:
+          type: string
+          readOnly: true
+        owner_name:
+          type: string
+          readOnly: true
+        curriculum_version:
+          type: string
+          format: uuid
+          nullable: true
+        curriculum_version_title:
+          type: string
+          nullable: true
+          readOnly: true
+        curriculum_subject:
+          type: string
+          format: uuid
+          nullable: true
+        curriculum_subject_name:
+          type: string
+          nullable: true
+          readOnly: true
+        member_count:
+          type: integer
+          readOnly: true
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - curriculum_subject_name
+      - curriculum_version_title
+      - id
+      - member_count
+      - name
+      - owner
+      - owner_name
+      - owner_username
+    ClassroomAssignment:
+      type: object
+      description: Serializer for listing classroom assignments.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        classroom:
+          type: string
+          format: uuid
+        classroom_name:
+          type: string
+          readOnly: true
+        paper_version:
+          type: string
+          format: uuid
+        paper_title:
+          type: string
+          readOnly: true
+        version_number:
+          type: integer
+          readOnly: true
+        delivery_configuration:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+        instructions:
+          type: string
+        start_at:
+          type: string
+          format: date-time
+          nullable: true
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        allow_late_submission:
+          type: boolean
+        is_published:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - classroom
+      - classroom_name
+      - created_at
+      - delivery_configuration
+      - id
+      - paper_title
+      - paper_version
+      - title
+      - version_number
+    ClassroomRosterMember:
+      type: object
+      description: Serializer for roster member identity visible ONLY to teachers
+        and admins.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        student:
+          type: integer
+        student_username:
+          type: string
+          readOnly: true
+        student_email:
+          type: string
+          readOnly: true
+        student_name:
+          type: string
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/ClassroomRosterMemberStatusEnum'
+        joined_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - joined_at
+      - student
+      - student_email
+      - student_name
+      - student_username
+    ClassroomRosterMemberStatusEnum:
+      enum:
+      - ACTIVE
+      - INVITED
+      - DROPPED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `INVITED` - Invited
+        * `DROPPED` - Dropped
+    CreateClassroom:
+      type: object
+      description: Serializer for creating a new classroom.
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        curriculum_version:
+          type: string
+          format: uuid
+          nullable: true
+        curriculum_subject:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - name
+    CreateClassroomAssignment:
+      type: object
+      description: Serializer for teacher creating a classroom assignment.
+      properties:
+        paper_version_id:
+          type: string
+          format: uuid
+        delivery_configuration_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+        instructions:
+          type: string
+          default: ''
+        start_at:
+          type: string
+          format: date-time
+          nullable: true
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        allow_late_submission:
+          type: boolean
+          default: false
+      required:
+      - delivery_configuration_id
+      - paper_version_id
+      - title
     Curriculum:
       type: object
       properties:
@@ -2852,6 +3287,66 @@ components:
         * `SILLY_MISTAKE` - Silly Mistake
         * `TIME_OUT` - Time Out
         * `OTHER` - Other
+    JoinClassroom:
+      type: object
+      description: Serializer for student joining a classroom via invite code.
+      properties:
+        invite_code:
+          type: string
+          maxLength: 20
+      required:
+      - invite_code
+    LearnerAcademicProfile:
+      type: object
+      description: Serializer for reading and setting primary and active curriculum
+        context.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        primary_curriculum_version:
+          type: string
+          format: uuid
+          nullable: true
+        primary_curriculum_code:
+          type: string
+          readOnly: true
+        primary_curriculum_name:
+          type: string
+          readOnly: true
+        active_curriculum_version:
+          type: string
+          format: uuid
+          nullable: true
+        active_curriculum_code:
+          type: string
+          readOnly: true
+        active_curriculum_name:
+          type: string
+          readOnly: true
+        onboarding_completed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - active_curriculum_code
+      - active_curriculum_name
+      - created_at
+      - id
+      - primary_curriculum_code
+      - primary_curriculum_name
+      - updated_at
+      - user
     LearnerAttemptPayload:
       type: object
       description: Full live attempt delivery payload for React Native web/mobile
@@ -3154,6 +3649,24 @@ components:
       - syllabus_node
       - target_exam
       - target_time_seconds
+    Logout:
+      type: object
+      description: Serializer for validating refresh token to blacklist on logout.
+      properties:
+        refresh:
+          type: string
+          description: JWT refresh token to revoke.
+      required:
+      - refresh
+    LogoutSuccessResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          default: Successfully logged out.
+        code:
+          type: string
+          default: logout_success
     MediumEnum:
       enum:
       - ENGLISH
@@ -4073,7 +4586,7 @@ components:
           title: Email address
         role:
           allOf:
-          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/UserProfileRoleEnum'
           readOnly: true
         first_name:
           type: string
@@ -4499,18 +5012,6 @@ components:
       - snapshot_id
       - solution_available
       - state
-    RoleEnum:
-      enum:
-      - STUDENT
-      - TEACHER
-      - PROFESSIONAL
-      - ADMIN
-      type: string
-      description: |-
-        * `STUDENT` - Student
-        * `TEACHER` - Teacher
-        * `PROFESSIONAL` - Professional
-        * `ADMIN` - Admin
     SaveResponseRequest:
       type: object
       description: Request payload for saving a question response.
@@ -4895,18 +5396,25 @@ components:
       required:
       - access
       - refresh
-    TokenRefresh:
+    TokenRefreshRequest:
       type: object
+      description: Serializer for requesting a new access token via refresh token.
+      properties:
+        refresh:
+          type: string
+          description: Valid JWT refresh token to exchange for a new access token.
+      required:
+      - refresh
+    TokenRefreshResponse:
+      type: object
+      description: Serializer for token refresh response payload.
       properties:
         access:
           type: string
           readOnly: true
-        refresh:
-          type: string
-          writeOnly: true
+          description: Newly issued 60-minute JWT access token.
       required:
       - access
-      - refresh
     TokenVerify:
       type: object
       properties:
@@ -4935,7 +5443,7 @@ components:
           title: Email address
         role:
           allOf:
-          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/UserProfileRoleEnum'
           readOnly: true
         first_name:
           type: string
@@ -4976,14 +5484,23 @@ components:
       - login_streak_days
       - role
       - username
-    UserRegistration:
+    UserProfileRoleEnum:
+      enum:
+      - STUDENT
+      - TEACHER
+      - PROFESSIONAL
+      - ADMIN
+      type: string
+      description: |-
+        * `STUDENT` - Student
+        * `TEACHER` - Teacher
+        * `PROFESSIONAL` - Professional
+        * `ADMIN` - Admin
+    UserRegistrationRequest:
       type: object
-      description: Serializer for user registration with role default and password
-        validation.
+      description: Serializer for user registration request payload (excluding server-assigned
+        id).
       properties:
-        id:
-          type: integer
-          readOnly: true
         username:
           type: string
           description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
@@ -5004,7 +5521,7 @@ components:
           maxLength: 150
         role:
           allOf:
-          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/UserRegistrationRequestRoleEnum'
           default: STUDENT
         phone_number:
           type: string
@@ -5030,9 +5547,18 @@ components:
           nullable: true
       required:
       - email
-      - id
       - password
       - username
+    UserRegistrationRequestRoleEnum:
+      enum:
+      - STUDENT
+      - TEACHER
+      - PROFESSIONAL
+      type: string
+      description: |-
+        * `STUDENT` - Student
+        * `TEACHER` - Teacher
+        * `PROFESSIONAL` - Professional
     UserTopicMastery:
       type: object
       description: Serializer for sub-topic topic mastery metrics for diagnostic AI
