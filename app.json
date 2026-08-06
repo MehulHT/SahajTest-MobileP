@@ -1,16 +1,18 @@
 {
   "expo": {
-    "name": "SahajTest-Mobile",
-    "slug": "SahajTest-Mobile",
+    "name": "SahajTest Mobile P",
+    "slug": "sahajtest-mobilep",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "sahajtestmobile",
+    "scheme": "sahajtestmobilep",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.mehulkumar.sahajtestmobilep"
     },
     "android": {
+      "package": "com.mehulkumar.sahajtestmobilep",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -37,6 +39,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7f5c75a2-5adc-439a-b1f4-e350bb552592"
+      }
+    },
+    "owner": "mehulkumar6499"
   }
 }

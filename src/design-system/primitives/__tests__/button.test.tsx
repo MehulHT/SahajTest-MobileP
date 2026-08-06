@@ -1,0 +1,4 @@
+import { render } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
+import { ThemeProvider } from '../../theme'; import { Button } from '../button';
+describe('Button', () => { it('exposes button semantics and the minimum touch target', async () => { const screen = await render(<ThemeProvider><Button label="Continue" /></ThemeProvider>); const button = screen.getByRole('button', { name: 'Continue' }); expect(button.props.accessibilityState).toEqual({ disabled: false, busy: false }); expect(StyleSheet.flatten(button.props.style)).toEqual(expect.objectContaining({ minHeight: 48 })); }); it('is disabled accessibly', async () => { const screen = await render(<ThemeProvider><Button disabled label="Continue" /></ThemeProvider>); expect(screen.getByRole('button', { name: 'Continue' }).props.accessibilityState.disabled).toBe(true); }); });

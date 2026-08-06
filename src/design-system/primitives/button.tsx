@@ -1,0 +1,9 @@
+import { type ComponentProps } from 'react';
+import { ActivityIndicator, Pressable, type StyleProp, type ViewStyle } from 'react-native';
+import { useTheme } from '../theme';
+import { AppText } from './app-text';
+export type ButtonProps = Omit<ComponentProps<typeof Pressable>, 'children' | 'style'> & { label: string; variant?: 'primary' | 'secondary'; isLoading?: boolean; loadingLabel?: string; style?: StyleProp<ViewStyle> };
+export function Button({ label, variant = 'primary', disabled = false, isLoading = false, loadingLabel, style, accessibilityLabel, ...props }: ButtonProps) {
+  const theme = useTheme(); const isDisabled = disabled || isLoading; const primary = variant === 'primary'; const visibleLabel = isLoading ? (loadingLabel ?? label) : label;
+  return <Pressable accessibilityLabel={accessibilityLabel ?? visibleLabel} accessibilityRole="button" accessibilityState={{ disabled: isDisabled, busy: isLoading }} disabled={isDisabled} style={({ pressed }) => [{ alignItems: 'center', backgroundColor: primary ? theme.colors.primary : theme.colors.surface, borderColor: primary ? theme.colors.primary : theme.colors.border, borderRadius: theme.radius.standard, borderWidth: 1, flexDirection: 'row', gap: theme.spacing[2], justifyContent: 'center', minHeight: 48, opacity: isDisabled ? 0.5 : 1, paddingHorizontal: theme.spacing[4] }, pressed && !isDisabled && { backgroundColor: primary ? theme.colors.primaryPressed : theme.colors.surfaceSecondary }, style]} {...props}>{isLoading ? <ActivityIndicator color={primary ? theme.colors.onPrimary : theme.colors.primary} /> : null}<AppText variant="label" style={{ color: primary ? theme.colors.onPrimary : theme.colors.textPrimary }}>{visibleLabel}</AppText></Pressable>;
+}

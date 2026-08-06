@@ -1,0 +1,5 @@
+module.exports = {
+  preset: 'jest-expo',
+  clearMocks: true,
+  moduleNameMapper: { '^@/(.*)$': '<rootDir>/src/$1', '^@/assets/(.*)$': '<rootDir>/assets/$1' },
+};

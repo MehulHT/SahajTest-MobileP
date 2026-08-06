@@ -1,0 +1,5081 @@
+openapi: 3.0.3
+info:
+  title: SahajTest Platform API
+  version: 2.3.0
+  description: REST API for SahajTest academic structures, canonical question bank,
+    and structured paper delivery foundation.
+paths:
+  /api/v1/academics/curricula/:
+    get:
+      operationId: v1_academics_curricula_list
+      description: Retrieve curricula filtered by provider_id, curriculum_type, or
+        search query.
+      summary: List curricula
+      parameters:
+      - in: query
+        name: curriculum_type
+        schema:
+          type: string
+          enum:
+          - COMPETITIVE_EXAM
+          - CORPORATE_TRAINING
+          - OTHER
+          - PROFESSIONAL_CERTIFICATION
+          - SCHOOL
+          - UNIVERSITY
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: query
+        name: provider_id
+        schema:
+          type: string
+      - in: query
+        name: search
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCurriculumList'
+          description: ''
+    post:
+      operationId: v1_academics_curricula_create
+      description: ADMIN only. Creates a new Curriculum under a provider.
+      summary: Create a curriculum
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Curriculum'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Curriculum'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Curriculum'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Curriculum'
+          description: ''
+        '400':
+          description: Validation error.
+        '403':
+          description: Forbidden - Admin rights required.
+  /api/v1/academics/curricula/{id}/:
+    get:
+      operationId: v1_academics_curricula_retrieve
+      description: Retrieve curriculum detail by ID.
+      summary: Retrieve curriculum detail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Curriculum'
+          description: ''
+        '404':
+          description: Curriculum not found.
+  /api/v1/academics/curriculum-subjects/:
+    post:
+      operationId: v1_academics_curriculum_subjects_create
+      description: ADMIN only. Attach a Subject to a CurriculumVersion.
+      summary: Attach subject to a curriculum version
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurriculumSubject'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CurriculumSubject'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CurriculumSubject'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumSubject'
+          description: ''
+        '400':
+          description: Validation error.
+        '403':
+          description: Forbidden - Admin rights required.
+  /api/v1/academics/curriculum-subjects/{id}/syllabus/:
+    get:
+      operationId: v1_academics_curriculum_subjects_syllabus_list
+      description: Returns the full hierarchical syllabus tree for a curriculum subject
+        with ZERO N+1 queries.
+      summary: Retrieve complete syllabus tree
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SyllabusNodeTree'
+          description: ''
+  /api/v1/academics/providers/:
+    get:
+      operationId: v1_academics_providers_list
+      description: Retrieve active education providers with optional provider_type
+        and search filters.
+      summary: List education providers
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: query
+        name: provider_type
+        schema:
+          type: string
+          enum:
+          - CERTIFICATION_BODY
+          - CORPORATE
+          - EXAM_AUTHORITY
+          - GOVERNMENT
+          - OTHER
+          - SCHOOL_BOARD
+          - UNIVERSITY
+      - in: query
+        name: search
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEducationProviderList'
+          description: ''
+    post:
+      operationId: v1_academics_providers_create
+      description: ADMIN only. Creates a new generic EducationProvider.
+      summary: Create an education provider
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EducationProvider'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EducationProvider'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EducationProvider'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EducationProvider'
+          description: ''
+        '400':
+          description: Validation error.
+        '403':
+          description: Forbidden - Admin rights required.
+  /api/v1/academics/providers/{id}/:
+    get:
+      operationId: v1_academics_providers_retrieve
+      description: Retrieve an education provider by ID.
+      summary: Retrieve an education provider detail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EducationProvider'
+          description: ''
+        '404':
+          description: Provider not found.
+  /api/v1/academics/syllabus-nodes/:
+    post:
+      operationId: v1_academics_syllabus_nodes_create
+      description: ADMIN only. Creates a new node in the syllabus hierarchy.
+      summary: Create a syllabus node
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyllabusNode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SyllabusNode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SyllabusNode'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyllabusNode'
+          description: ''
+        '400':
+          description: Validation error.
+        '403':
+          description: Forbidden - Admin rights required.
+  /api/v1/academics/syllabus-nodes/{id}/:
+    get:
+      operationId: v1_academics_syllabus_nodes_retrieve
+      description: Retrieve or update (move) a syllabus node (ADMIN only for write).
+      summary: Retrieve syllabus node detail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyllabusNode'
+          description: ''
+        '404':
+          description: SyllabusNode not found.
+    patch:
+      operationId: v1_academics_syllabus_nodes_partial_update
+      description: ADMIN only. Move node to a new parent or sequence position.
+      summary: Update or move a syllabus node
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSyllabusNode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSyllabusNode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSyllabusNode'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyllabusNode'
+          description: ''
+        '400':
+          description: Validation error.
+        '403':
+          description: Forbidden - Admin rights required.
+        '404':
+          description: Node not found.
+  /api/v1/academics/versions/:
+    post:
+      operationId: v1_academics_versions_create
+      description: ADMIN only. Create a version for a curriculum.
+      summary: Create a curriculum version
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CurriculumVersion'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CurriculumVersion'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CurriculumVersion'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumVersion'
+          description: ''
+        '400':
+          description: Validation error.
+        '403':
+          description: Forbidden - Admin rights required.
+  /api/v1/academics/versions/{id}/:
+    get:
+      operationId: v1_academics_versions_retrieve
+      description: Retrieve curriculum version detail by ID.
+      summary: Retrieve curriculum version detail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurriculumVersion'
+          description: ''
+        '404':
+          description: Version not found.
+  /api/v1/academics/versions/{id}/subjects/:
+    get:
+      operationId: v1_academics_versions_subjects_list
+      description: Returns list of CurriculumSubjects attached to the specified version
+        in sequence order.
+      summary: Retrieve subjects for a curriculum version
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CurriculumSubject'
+          description: ''
+        '404':
+          description: Version not found.
+  /api/v1/auth/learner/academic-profile/:
+    get:
+      operationId: v1_auth_learner_academic_profile_retrieve
+      description: Returns student primary curriculum target version and active exploration
+        context.
+      summary: Retrieve learner academic profile
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Learner profile details.
+    patch:
+      operationId: v1_auth_learner_academic_profile_partial_update
+      description: Sets student primary curriculum target. Automatically initializes
+        active exploration context if unset.
+      summary: Set primary curriculum target version
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSetPrimaryCurriculumVersionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSetPrimaryCurriculumVersionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSetPrimaryCurriculumVersionRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Learner profile details.
+        '400':
+          description: Bad Request.
+  /api/v1/auth/learner/academic-profile/switch-context/:
+    post:
+      operationId: v1_auth_learner_academic_profile_switch_context_create
+      description: Switches learner active curriculum context without modifying their
+        primary target.
+      summary: Switch active curriculum exploration context
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SwitchActiveContextRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SwitchActiveContextRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SwitchActiveContextRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Updated learner profile details.
+  /api/v1/auth/login/:
+    post:
+      operationId: v1_auth_login_create
+      description: Authenticates user credentials and returns JWT access and refresh
+        tokens containing role and exam claims.
+      summary: Obtain JWT token pair
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPair'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainResponse'
+          description: ''
+        '400':
+          description: Bad Request - Missing username or password.
+        '401':
+          description: Unauthorized - Invalid credentials.
+  /api/v1/auth/profile/:
+    get:
+      operationId: v1_auth_profile_retrieve
+      description: Returns profile metrics, target exam preferences, and login telemetry
+        for the authenticated user.
+      summary: Retrieve user profile
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+        '401':
+          description: Unauthorized - Invalid or missing Bearer token.
+    patch:
+      operationId: v1_auth_profile_partial_update
+      description: Partially update user target goals, phone number, and instruction
+        medium.
+      summary: Update user profile
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+        '400':
+          description: Bad Request - Invalid field data.
+        '401':
+          description: Unauthorized - Invalid or missing Bearer token.
+  /api/v1/auth/refresh/:
+    post:
+      operationId: v1_auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/auth/register/:
+    post:
+      operationId: v1_auth_register_create
+      description: Creates a new student/user profile, validates password strength,
+        and issues JWT access and refresh tokens.
+      summary: Register a new user
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+          description: ''
+        '400':
+          description: Validation Error - Invalid input parameters or existing user
+            data.
+  /api/v1/auth/verify/:
+    post:
+      operationId: v1_auth_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerify'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenVerify'
+          description: ''
+  /api/v1/learner/academic-profile/:
+    get:
+      operationId: v1_learner_academic_profile_retrieve
+      description: Returns student primary curriculum target version and active exploration
+        context.
+      summary: Retrieve learner academic profile
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Learner profile details.
+    patch:
+      operationId: v1_learner_academic_profile_partial_update
+      description: Sets student primary curriculum target. Automatically initializes
+        active exploration context if unset.
+      summary: Set primary curriculum target version
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSetPrimaryCurriculumVersionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSetPrimaryCurriculumVersionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSetPrimaryCurriculumVersionRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Learner profile details.
+        '400':
+          description: Bad Request.
+  /api/v1/learner/academic-profile/switch-context/:
+    post:
+      operationId: v1_learner_academic_profile_switch_context_create
+      description: Switches learner active curriculum context without modifying their
+        primary target.
+      summary: Switch active curriculum exploration context
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SwitchActiveContextRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SwitchActiveContextRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SwitchActiveContextRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Updated learner profile details.
+  /api/v1/learner/paper-attempts/{attempt_id}/:
+    get:
+      operationId: v1_learner_paper_attempts_retrieve
+      description: Fetch live attempt delivery payload.
+      summary: Get Live Attempt Payload
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Attempts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerAttemptPayload'
+          description: ''
+        '404':
+          description: Not Found
+  /api/v1/learner/paper-attempts/{attempt_id}/questions/{snapshot_id}/clear/:
+    post:
+      operationId: v1_learner_paper_attempts_questions_clear_create
+      description: Clear learner response for a question snapshot.
+      summary: Clear Response
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: snapshot_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Attempts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Response cleared
+  /api/v1/learner/paper-attempts/{attempt_id}/questions/{snapshot_id}/mark-review/:
+    post:
+      operationId: v1_learner_paper_attempts_questions_mark_review_create
+      description: Mark question snapshot for review.
+      summary: Mark for Review
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: snapshot_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Attempts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Marked for review
+  /api/v1/learner/paper-attempts/{attempt_id}/questions/{snapshot_id}/response/:
+    put:
+      operationId: v1_learner_paper_attempts_questions_response_update
+      description: Save learner response payload for a question snapshot.
+      summary: Save Response Payload
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: snapshot_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Attempts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveResponseRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SaveResponseRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SaveResponseRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Response saved
+  /api/v1/learner/paper-attempts/{attempt_id}/questions/{snapshot_id}/submit-practice/:
+    post:
+      operationId: v1_learner_paper_attempts_questions_submit_practice_create
+      description: Submit an individual question in PRACTICE delivery mode.
+      summary: Submit Practice Question
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: snapshot_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Attempts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Practice question submitted
+  /api/v1/learner/paper-attempts/{attempt_id}/questions/{snapshot_id}/unmark-review/:
+    post:
+      operationId: v1_learner_paper_attempts_questions_unmark_review_create
+      description: Unmark question snapshot from review.
+      summary: Unmark Review
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: snapshot_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Attempts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Unmarked review
+  /api/v1/learner/paper-attempts/{attempt_id}/questions/{snapshot_id}/view/:
+    post:
+      operationId: v1_learner_paper_attempts_questions_view_create
+      description: Record question view and transition state to VISITED.
+      summary: Record Question View
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: snapshot_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Attempts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Question view recorded
+  /api/v1/learner/paper-attempts/{attempt_id}/result/:
+    get:
+      operationId: v1_learner_paper_attempts_result_retrieve
+      description: Fetch attempt scoring and result summary.
+      summary: Get Attempt Result
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Results
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptResult'
+          description: ''
+  /api/v1/learner/paper-attempts/{attempt_id}/review/:
+    get:
+      operationId: v1_learner_paper_attempts_review_retrieve
+      description: Fetch attempt question review and solution disclosure payload.
+      summary: Get Attempt Review & Solutions
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Results
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptReviewPayload'
+          description: ''
+  /api/v1/learner/paper-attempts/{attempt_id}/submit/:
+    post:
+      operationId: v1_learner_paper_attempts_submit_create
+      description: Submit whole paper attempt for evaluation.
+      summary: Submit Whole Paper Attempt
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Attempts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptResult'
+          description: ''
+  /api/v1/learner/paper-attempts/active/:
+    get:
+      operationId: v1_learner_paper_attempts_active_retrieve
+      description: List all active IN_PROGRESS attempts for the current learner.
+      summary: List Active Attempts
+      tags:
+      - Learner Attempts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: List of active attempts
+  /api/v1/learner/papers/:
+    get:
+      operationId: v1_learner_papers_list
+      description: Fetch published papers matching learner active/primary curriculum
+        version.
+      summary: Learner Paper Catalogue
+      parameters:
+      - in: query
+        name: curriculum_version_id
+        schema:
+          type: integer
+        description: Filter by curriculum version
+      tags:
+      - Learner Papers
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LearnerPaperList'
+          description: ''
+  /api/v1/learner/papers/{id}/:
+    get:
+      operationId: v1_learner_papers_retrieve
+      description: Learner detailed view of a published paper.
+      summary: Learner Paper Detail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Papers
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerPaperDetail'
+          description: ''
+        '404':
+          description: Not Found
+  /api/v1/learner/papers/{id}/start-attempt/:
+    post:
+      operationId: v1_learner_papers_start_attempt_create
+      description: Initialize a new attempt or return existing active IN_PROGRESS
+        attempt.
+      summary: Start Paper Attempt
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Learner Attempts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartAttemptRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StartAttemptRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StartAttemptRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerAttemptPayload'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerAttemptPayload'
+          description: ''
+  /api/v1/papers/:
+    get:
+      operationId: v1_papers_list
+      description: Retrieve all paper entities with curriculum metadata.
+      summary: List Papers
+      tags:
+      - Paper Authoring
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaperRead'
+          description: ''
+    post:
+      operationId: v1_papers_create
+      description: Create a new Paper entity for a curriculum version.
+      summary: Create Paper
+      tags:
+      - Paper Authoring
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaperWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaperWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaperWrite'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperRead'
+          description: ''
+        '400':
+          description: Validation Error
+  /api/v1/papers/{id}/:
+    get:
+      operationId: v1_papers_retrieve
+      description: Retrieve or update a Paper entity.
+      summary: Get Paper Detail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperRead'
+          description: ''
+        '404':
+          description: Not Found
+    patch:
+      operationId: v1_papers_partial_update
+      description: Retrieve or update a Paper entity.
+      summary: Update Paper
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperWrite'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperRead'
+          description: ''
+        '400':
+          description: Validation Error
+  /api/v1/papers/{id}/versions/:
+    post:
+      operationId: v1_papers_versions_create_2
+      description: Create a new draft version for a Paper.
+      summary: Create Paper Version
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaperVersionWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaperVersionWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaperVersionWrite'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperVersionRead'
+          description: ''
+        '400':
+          description: Validation Error
+  /api/v1/papers/attempts/{attempt_id}/release-result/:
+    post:
+      operationId: v1_papers_attempts_release_result_create
+      description: Administrative override to release results for a submitted attempt.
+      summary: Release Attempt Result (Admin)
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Admin Management
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptResult'
+          description: ''
+  /api/v1/papers/delivery-configs/{id}/:
+    patch:
+      operationId: v1_papers_delivery_configs_partial_update
+      description: Update a DeliveryConfiguration.
+      summary: Update Delivery Configuration
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Delivery Configurations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDeliveryConfiguration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDeliveryConfiguration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDeliveryConfiguration'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryConfiguration'
+          description: ''
+  /api/v1/papers/questions/{id}/:
+    patch:
+      operationId: v1_papers_questions_partial_update
+      description: Update or remove a PaperQuestion from a section.
+      summary: Update PaperQuestion
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperQuestionAuthoring'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperQuestionAuthoring'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperQuestionAuthoring'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperQuestionAuthoring'
+          description: ''
+    delete:
+      operationId: v1_papers_questions_destroy
+      description: Update or remove a PaperQuestion from a section.
+      summary: Remove Question
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Deleted Successfully
+  /api/v1/papers/sections/{id}/:
+    patch:
+      operationId: v1_papers_sections_partial_update
+      description: Update or delete a PaperSection.
+      summary: Update Section
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperSection'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperSection'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperSection'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperSection'
+          description: ''
+        '400':
+          description: Validation Error
+    delete:
+      operationId: v1_papers_sections_destroy
+      description: Update or delete a PaperSection.
+      summary: Remove Section
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Deleted Successfully
+  /api/v1/papers/sections/{s_pk}/questions/:
+    post:
+      operationId: v1_papers_sections_questions_create
+      description: Manage PaperQuestions within a draft PaperSection.
+      summary: Add Question to Section
+      parameters:
+      - in: path
+        name: s_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaperQuestionAuthoring'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaperQuestionAuthoring'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaperQuestionAuthoring'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperQuestionAuthoring'
+          description: ''
+        '400':
+          description: Validation Error
+  /api/v1/papers/versions/{id}/:
+    get:
+      operationId: v1_papers_versions_retrieve
+      description: Retrieve or update a PaperVersion.
+      summary: Get Paper Version Detail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperVersionRead'
+          description: ''
+        '404':
+          description: Not Found
+    patch:
+      operationId: v1_papers_versions_partial_update
+      description: Retrieve or update a PaperVersion.
+      summary: Update Draft Version
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperVersionWrite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperVersionWrite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPaperVersionWrite'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperVersionRead'
+          description: ''
+        '400':
+          description: Validation Error
+  /api/v1/papers/versions/{id}/{action}/:
+    post:
+      operationId: v1_papers_versions_create
+      description: 'Trigger lifecycle action: submit-for-review, approve, publish,
+        retire, archive, clone, validate-publication.'
+      summary: Paper Version Lifecycle Action
+      parameters:
+      - in: path
+        name: action
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Lifecycle
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperVersionRead'
+          description: ''
+        '400':
+          description: Validation Error
+  /api/v1/papers/versions/{v_pk}/delivery-configs/:
+    get:
+      operationId: v1_papers_versions_delivery_configs_list
+      description: Manage delivery configurations for a PaperVersion.
+      summary: List Delivery Configurations
+      parameters:
+      - in: path
+        name: v_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Delivery Configurations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeliveryConfiguration'
+          description: ''
+    post:
+      operationId: v1_papers_versions_delivery_configs_create
+      description: Manage delivery configurations for a PaperVersion.
+      summary: Create Delivery Configuration
+      parameters:
+      - in: path
+        name: v_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Delivery Configurations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryConfiguration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeliveryConfiguration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DeliveryConfiguration'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryConfiguration'
+          description: ''
+        '400':
+          description: Validation Error
+  /api/v1/papers/versions/{v_pk}/questions/reorder/:
+    post:
+      operationId: v1_papers_versions_questions_reorder_create
+      description: Reorder questions within a section.
+      summary: Reorder Questions
+      parameters:
+      - in: path
+        name: v_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaperQuestionReorder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaperQuestionReorder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaperQuestionReorder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaperQuestionAuthoring'
+          description: ''
+  /api/v1/papers/versions/{v_pk}/sections/:
+    get:
+      operationId: v1_papers_versions_sections_list
+      description: Manage sections within a draft PaperVersion.
+      summary: List Version Sections
+      parameters:
+      - in: path
+        name: v_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaperSection'
+          description: ''
+    post:
+      operationId: v1_papers_versions_sections_create
+      description: Manage sections within a draft PaperVersion.
+      summary: Add Section
+      parameters:
+      - in: path
+        name: v_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaperSection'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaperSection'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaperSection'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperSection'
+          description: ''
+        '400':
+          description: Validation Error
+  /api/v1/papers/versions/{v_pk}/sections/reorder/:
+    post:
+      operationId: v1_papers_versions_sections_reorder_create
+      description: Reorder sections within a draft PaperVersion.
+      summary: Reorder Sections
+      parameters:
+      - in: path
+        name: v_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Paper Authoring
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaperSectionReorder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaperSectionReorder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaperSectionReorder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaperSection'
+          description: ''
+  /api/v1/questions/:
+    post:
+      operationId: v1_questions_create
+      description: Creates a question draft, computes SHA-256 fingerprint, checks
+        exact/near duplicates, and returns question detail with structured duplicate
+        result.
+      summary: Create a canonical question draft
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanonicalQuestionCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CanonicalQuestionCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CanonicalQuestionCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanonicalQuestionCreateResponse'
+          description: ''
+        '400':
+          description: Bad Request - Validation or payload error.
+        '401':
+          description: Unauthorized.
+  /api/v1/questions/{id}/:
+    get:
+      operationId: v1_questions_retrieve
+      description: API view for retrieving and updating a canonical question.
+      summary: Retrieve a canonical question by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerQuestion'
+          description: ''
+        '404':
+          description: Not Found.
+    patch:
+      operationId: v1_questions_partial_update
+      description: API view for retrieving and updating a canonical question.
+      summary: Update a canonical question draft
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCanonicalQuestionCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCanonicalQuestionCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCanonicalQuestionCreate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+          description: ''
+        '400':
+          description: Bad Request.
+        '403':
+          description: Forbidden.
+  /api/v1/questions/{id}/{action}/:
+    post:
+      operationId: execute_question_lifecycle_action
+      description: Transitions question lifecycle state e.g., submit-review, request-changes,
+        approve, reject, publish, retire, archive.
+      summary: Execute question lifecycle state transition
+      parameters:
+      - in: path
+        name: action
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Question'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Question'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+          description: ''
+        '400':
+          description: Bad Request.
+        '403':
+          description: Forbidden.
+  /api/v1/questions/analytics/:
+    get:
+      operationId: v1_questions_analytics_retrieve
+      description: Computes user accuracy, speed ratio distributions, and subject/subtopic
+        performance breakdowns.
+      summary: Retrieve question attempt analytics
+      parameters:
+      - in: query
+        name: subject
+        schema:
+          type: string
+          enum:
+          - BIOLOGY
+          - CHEMISTRY
+          - MATHEMATICS
+          - PHYSICS
+        description: Filter analytics by subject (PHYSICS, CHEMISTRY, MATHEMATICS,
+          BIOLOGY)
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptAnalyticsResponse'
+          description: ''
+        '400':
+          description: Bad Request - Invalid subject filter value.
+        '401':
+          description: Unauthorized - Bearer token missing or invalid.
+  /api/v1/questions/attempt/:
+    post:
+      operationId: v1_questions_attempt_create
+      description: Ingests user telemetry (time spent, option selected, error tag),
+        updates sub-topic accuracy metrics, and flags mistake vault entry if incorrect.
+      summary: Record a question attempt
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionAttemptCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuestionAttemptCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuestionAttemptCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptResponse'
+          description: ''
+        '400':
+          description: Bad Request - Invalid payload or question ID.
+        '401':
+          description: Unauthorized - Bearer token missing or invalid.
+  /api/v1/questions/check-duplicates/:
+    post:
+      operationId: v1_questions_check_duplicates_create
+      description: API view for pre-checking exact and near duplicates before question
+        creation.
+      summary: Pre-check question duplicates
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DuplicateCheck'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DuplicateCheck'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DuplicateCheck'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Duplicate diagnostic payload.
+  /api/v1/questions/feed/:
+    get:
+      operationId: v1_questions_feed_retrieve
+      description: Returns recommended subtopic drills (weakness/unpracticed), must-do
+        PYQs, mistake vault summary, and syllabus completion metrics.
+      summary: Retrieve personalized practice feed
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizedFeedResponse'
+          description: ''
+        '401':
+          description: Unauthorized - Bearer token missing or invalid.
+  /api/v1/questions/mastery/:
+    get:
+      operationId: v1_questions_mastery_list
+      description: Returns sub-topic accuracy percentages and attempt counts for the
+        authenticated student.
+      summary: Retrieve topic mastery dashboard metrics
+      parameters:
+      - in: query
+        name: subject
+        schema:
+          type: string
+          enum:
+          - BIOLOGY
+          - CHEMISTRY
+          - MATHEMATICS
+          - PHYSICS
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserTopicMastery'
+          description: ''
+        '401':
+          description: Unauthorized - Bearer token missing or invalid.
+  /api/v1/questions/mistake-vault/:
+    get:
+      operationId: v1_questions_mistake_vault_list
+      description: Returns list of attempts flagged in the Mistake Vault for review,
+        ordered by attempted_at descending.
+      summary: Retrieve student Mistake Vault
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: query
+        name: subject
+        schema:
+          type: string
+          enum:
+          - BIOLOGY
+          - CHEMISTRY
+          - MATHEMATICS
+          - PHYSICS
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQuestionAttemptDetailList'
+          description: ''
+        '401':
+          description: Unauthorized - Bearer token missing or invalid.
+  /api/v1/questions/search/:
+    get:
+      operationId: v1_questions_search_list
+      description: Fetch questions with micro-filtering by subject, chapter, difficulty,
+        PYQ flag, unsolved status, or incorrect attempts.
+      summary: Search and filter question bank
+      parameters:
+      - in: query
+        name: chapter_id
+        schema:
+          type: integer
+      - in: query
+        name: difficulty
+        schema:
+          type: string
+          enum:
+          - EASY
+          - EXTREME
+          - HARD
+          - MEDIUM
+      - in: query
+        name: exam_year
+        schema:
+          type: integer
+      - in: query
+        name: incorrect_only
+        schema:
+          type: boolean
+        description: Returns questions the user previously answered incorrectly
+      - in: query
+        name: is_must_do_pyq
+        schema:
+          type: boolean
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: query
+        name: sub_topic_id
+        schema:
+          type: integer
+      - in: query
+        name: subject
+        schema:
+          type: string
+          enum:
+          - BIOLOGY
+          - CHEMISTRY
+          - MATHEMATICS
+          - PHYSICS
+      - in: query
+        name: unsolved_only
+        schema:
+          type: boolean
+        description: Excludes questions previously attempted by the user
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLearnerQuestionList'
+          description: ''
+        '401':
+          description: Unauthorized - Bearer token missing or invalid.
+  /api/v1/questions/syllabus/:
+    get:
+      operationId: v1_questions_syllabus_list
+      description: Returns list of chapters with nested sub-topics. Optionally filter
+        by subject.
+      summary: Retrieve syllabus navigation tree
+      parameters:
+      - in: query
+        name: subject
+        schema:
+          type: string
+          enum:
+          - BIOLOGY
+          - CHEMISTRY
+          - MATHEMATICS
+          - PHYSICS
+        description: Filter chapters by subject (PHYSICS, CHEMISTRY, MATHEMATICS,
+          BIOLOGY)
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chapter'
+          description: ''
+components:
+  schemas:
+    AccuracySummary:
+      type: object
+      description: Summary metrics of user question attempts.
+      properties:
+        total_attempts:
+          type: integer
+        unique_questions_attempted:
+          type: integer
+        correct_attempts:
+          type: integer
+        incorrect_attempts:
+          type: integer
+        unique_questions_correct:
+          type: integer
+        accuracy_percentage:
+          type: number
+          format: double
+        average_actual_seconds:
+          type: number
+          format: double
+          nullable: true
+        average_target_seconds:
+          type: number
+          format: double
+          nullable: true
+        average_speed_ratio:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - accuracy_percentage
+      - average_actual_seconds
+      - average_speed_ratio
+      - average_target_seconds
+      - correct_attempts
+      - incorrect_attempts
+      - total_attempts
+      - unique_questions_attempted
+      - unique_questions_correct
+    AttemptAnalyticsFilters:
+      type: object
+      description: Applied filters in analytics response.
+      properties:
+        subject:
+          type: string
+          nullable: true
+      required:
+      - subject
+    AttemptAnalyticsResponse:
+      type: object
+      description: Complete attempt analytics payload response contract.
+      properties:
+        filters:
+          $ref: '#/components/schemas/AttemptAnalyticsFilters'
+        summary:
+          $ref: '#/components/schemas/AccuracySummary'
+        speed_distribution:
+          $ref: '#/components/schemas/SpeedDistribution'
+        subjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubjectAnalyticsItem'
+        subtopics:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubtopicAnalyticsItem'
+      required:
+      - filters
+      - speed_distribution
+      - subjects
+      - subtopics
+      - summary
+    AttemptResponse:
+      type: object
+      properties:
+        attempt:
+          $ref: '#/components/schemas/QuestionAttemptDetail'
+        is_correct:
+          type: boolean
+        solution_text:
+          type: string
+      required:
+      - attempt
+      - is_correct
+      - solution_text
+    AttemptResult:
+      type: object
+      description: Serializer for paper attempt scoring and result summary.
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        paper_id:
+          type: string
+          format: uuid
+        paper_title:
+          type: string
+        version_number:
+          type: integer
+        status:
+          type: string
+        submission_reason:
+          type: string
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        result_released_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_result_released:
+          type: boolean
+        pending_manual_evaluation:
+          type: boolean
+        pending_manual_count:
+          type: integer
+        raw_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          nullable: true
+        maximum_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          nullable: true
+        correct_count:
+          type: integer
+          nullable: true
+        incorrect_count:
+          type: integer
+          nullable: true
+        unanswered_count:
+          type: integer
+          nullable: true
+        section_scores_breakdown:
+          type: object
+          additionalProperties: {}
+      required:
+      - attempt_id
+      - correct_count
+      - incorrect_count
+      - is_result_released
+      - maximum_score
+      - paper_id
+      - paper_title
+      - pending_manual_count
+      - pending_manual_evaluation
+      - raw_score
+      - result_released_at
+      - section_scores_breakdown
+      - status
+      - submission_reason
+      - submitted_at
+      - unanswered_count
+      - version_number
+    AttemptReviewPayload:
+      type: object
+      description: Payload for whole-paper review and solutions.
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        result_released_at:
+          type: string
+          format: date-time
+          nullable: true
+        solution_released_at:
+          type: string
+          format: date-time
+          nullable: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewQuestionItem'
+      required:
+      - attempt_id
+      - questions
+      - result_released_at
+      - solution_released_at
+      - status
+    BlankEnum:
+      enum:
+      - ''
+    CanonicalQuestionCreate:
+      type: object
+      description: Serializer for creating a new canonical question draft through
+        QuestionService.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sub_topic:
+          type: integer
+        syllabus_node:
+          type: string
+          format: uuid
+          nullable: true
+        question_text:
+          type: string
+        options:
+          description: 'List of option objects, e.g., [{''id'': ''A'', ''text'': ''Option
+            A''}]'
+        correct_option_id:
+          type: string
+          maxLength: 50
+        question_type:
+          allOf:
+          - $ref: '#/components/schemas/QuestionTypeEnum'
+          default: SINGLE_CHOICE
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          default: MEDIUM
+        target_time_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          default: 120
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          default: '4.00'
+        negative_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          default: '1.00'
+        language_code:
+          type: string
+          default: en
+          maxLength: 10
+        instructions:
+          type: string
+        explanation:
+          type: string
+        hint:
+          type: string
+        source_type:
+          allOf:
+          - $ref: '#/components/schemas/SourceTypeEnum'
+          default: MANUAL
+        source_name:
+          type: string
+          maxLength: 255
+        source_authority:
+          type: string
+          maxLength: 100
+        source_reference:
+          type: string
+          maxLength: 255
+        source_url:
+          nullable: true
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        exam_year:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        is_must_do_pyq:
+          type: boolean
+        target_exam:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TargetExamEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusCd9Enum'
+          readOnly: true
+        fingerprint:
+          type: string
+          readOnly: true
+          description: SHA-256 hex fingerprint of normalized educational core identity.
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - correct_option_id
+      - created_at
+      - created_by
+      - fingerprint
+      - id
+      - question_text
+      - status
+      - sub_topic
+    CanonicalQuestionCreateResponse:
+      type: object
+      properties:
+        question:
+          $ref: '#/components/schemas/Question'
+        duplicate_result:
+          type: object
+          additionalProperties: {}
+      required:
+      - duplicate_result
+      - question
+    Chapter:
+      type: object
+      description: Serializer for syllabus chapters with nested sub-topics.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        subject:
+          $ref: '#/components/schemas/SubjectEnum'
+        name:
+          type: string
+          maxLength: 255
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        sub_topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubTopic'
+          readOnly: true
+      required:
+      - id
+      - name
+      - sub_topics
+      - subject
+    Curriculum:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/EducationProvider'
+          readOnly: true
+        provider_id:
+          type: string
+          format: uuid
+          writeOnly: true
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          description: Program code, unique within provider.
+          maxLength: 100
+        curriculum_type:
+          $ref: '#/components/schemas/CurriculumTypeEnum'
+        description:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - curriculum_type
+      - id
+      - name
+      - provider
+      - provider_id
+      - updated_at
+    CurriculumSubject:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        curriculum_version_id:
+          type: string
+          format: uuid
+          writeOnly: true
+        subject:
+          allOf:
+          - $ref: '#/components/schemas/Subject'
+          readOnly: true
+        subject_id:
+          type: string
+          format: uuid
+          writeOnly: true
+        display_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_mandatory:
+          type: boolean
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - curriculum_version_id
+      - id
+      - subject
+      - subject_id
+      - updated_at
+    CurriculumTypeEnum:
+      enum:
+      - SCHOOL
+      - COMPETITIVE_EXAM
+      - UNIVERSITY
+      - PROFESSIONAL_CERTIFICATION
+      - CORPORATE_TRAINING
+      - OTHER
+      type: string
+      description: |-
+        * `SCHOOL` - School
+        * `COMPETITIVE_EXAM` - Competitive Exam
+        * `UNIVERSITY` - University
+        * `PROFESSIONAL_CERTIFICATION` - Professional Certification
+        * `CORPORATE_TRAINING` - Corporate Training
+        * `OTHER` - Other
+    CurriculumVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        curriculum:
+          allOf:
+          - $ref: '#/components/schemas/Curriculum'
+          readOnly: true
+        curriculum_id:
+          type: string
+          format: uuid
+          writeOnly: true
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          description: Version code, unique within curriculum.
+          maxLength: 100
+        valid_from:
+          type: string
+          format: date
+          nullable: true
+        valid_until:
+          type: string
+          format: date
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/CurriculumVersionStatusEnum'
+          default: DRAFT
+        is_current:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - curriculum
+      - curriculum_id
+      - id
+      - name
+      - updated_at
+    CurriculumVersionStatusEnum:
+      enum:
+      - DRAFT
+      - ACTIVE
+      - RETIRED
+      - ARCHIVED
+      type: string
+      description: |-
+        * `DRAFT` - Draft
+        * `ACTIVE` - Active
+        * `RETIRED` - Retired
+        * `ARCHIVED` - Archived
+    CustomTokenObtainPair:
+      type: object
+      description: Custom TokenObtainPairSerializer injecting custom claims into JWT
+        tokens.
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - username
+    DeliveryConfiguration:
+      type: object
+      description: Serializer for managing delivery configurations.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        paper_version:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        mode:
+          allOf:
+          - $ref: '#/components/schemas/ModeEnum'
+          default: EXAM_SIMULATION
+        is_default:
+          type: boolean
+          default: false
+        is_active:
+          type: boolean
+          default: true
+        time_limit_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        auto_submit_on_timeout:
+          type: boolean
+          default: true
+        navigation_mode:
+          allOf:
+          - $ref: '#/components/schemas/NavigationModeEnum'
+          default: FREE
+        allow_question_skipping:
+          type: boolean
+          default: true
+        allow_answer_change:
+          type: boolean
+          default: true
+        allow_clear_response:
+          type: boolean
+          default: true
+        allow_mark_for_review:
+          type: boolean
+          default: true
+        show_question_palette:
+          type: boolean
+          default: true
+        solution_release_policy:
+          allOf:
+          - $ref: '#/components/schemas/SolutionReleasePolicyEnum'
+          default: AFTER_PAPER_SUBMISSION
+        result_release_policy:
+          allOf:
+          - $ref: '#/components/schemas/ResultReleasePolicyEnum'
+          default: IMMEDIATE_ON_SUBMISSION
+        show_score_after_submission:
+          type: boolean
+          default: true
+        show_correct_answers_after_submission:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - paper_version
+      - updated_at
+    DifficultyEnum:
+      enum:
+      - EASY
+      - MEDIUM
+      - HARD
+      - EXTREME
+      type: string
+      description: |-
+        * `EASY` - Easy
+        * `MEDIUM` - Medium
+        * `HARD` - Hard
+        * `EXTREME` - Extreme
+    DuplicateCheck:
+      type: object
+      description: Serializer for checking exact and near duplicates before question
+        submission.
+      properties:
+        question_text:
+          type: string
+        question_type:
+          type: string
+          default: SINGLE_CHOICE
+        options:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        correct_option_id:
+          type: string
+          default: ''
+        language_code:
+          type: string
+          default: en
+        sub_topic_id:
+          type: integer
+          nullable: true
+        syllabus_node_id:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - question_text
+    EducationProvider:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          description: Normalized unique identification code.
+          maxLength: 100
+        provider_type:
+          $ref: '#/components/schemas/ProviderTypeEnum'
+        description:
+          type: string
+        website_url:
+          nullable: true
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - id
+      - name
+      - provider_type
+      - updated_at
+    ErrorTypeEnum:
+      enum:
+      - CONCEPTUAL
+      - CALCULATION
+      - SILLY_MISTAKE
+      - TIME_OUT
+      - OTHER
+      type: string
+      description: |-
+        * `CONCEPTUAL` - Conceptual Error
+        * `CALCULATION` - Calculation Error
+        * `SILLY_MISTAKE` - Silly Mistake
+        * `TIME_OUT` - Time Out
+        * `OTHER` - Other
+    LearnerAttemptPayload:
+      type: object
+      description: Full live attempt delivery payload for React Native web/mobile
+        execution.
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        paper_id:
+          type: string
+          format: uuid
+        paper_title:
+          type: string
+        paper_code:
+          type: string
+        version_number:
+          type: integer
+        delivery_configuration_id:
+          type: string
+          format: uuid
+          nullable: true
+        mode:
+          type: string
+        status:
+          type: string
+        server_now:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        remaining_seconds:
+          type: integer
+          nullable: true
+        effective_delivery_settings:
+          type: object
+          additionalProperties: {}
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearnerPaperSection'
+        progress_summary:
+          type: object
+          additionalProperties: {}
+      required:
+      - attempt_id
+      - delivery_configuration_id
+      - effective_delivery_settings
+      - expires_at
+      - mode
+      - paper_code
+      - paper_id
+      - paper_title
+      - progress_summary
+      - remaining_seconds
+      - sections
+      - server_now
+      - started_at
+      - status
+      - version_number
+    LearnerDeliveryConfigSummary:
+      type: object
+      description: Learner-facing summary of delivery mode configuration.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
+        is_default:
+          type: boolean
+        time_limit_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        navigation_mode:
+          $ref: '#/components/schemas/NavigationModeEnum'
+        allow_question_skipping:
+          type: boolean
+        allow_answer_change:
+          type: boolean
+        show_question_palette:
+          type: boolean
+        solution_release_policy:
+          $ref: '#/components/schemas/SolutionReleasePolicyEnum'
+        result_release_policy:
+          $ref: '#/components/schemas/ResultReleasePolicyEnum'
+      required:
+      - id
+      - name
+    LearnerPaperDetail:
+      type: object
+      description: Detailed learner view of a paper, including delivery configurations
+        and active attempt.
+      properties:
+        paper:
+          $ref: '#/components/schemas/LearnerPaperList'
+        published_version_id:
+          type: integer
+        version_number:
+          type: integer
+        duration_seconds:
+          type: integer
+        maximum_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+        instructions:
+          type: string
+        delivery_configurations:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearnerDeliveryConfigSummary'
+        has_active_attempt:
+          type: boolean
+          readOnly: true
+        active_attempt_id:
+          type: integer
+          nullable: true
+          readOnly: true
+      required:
+      - active_attempt_id
+      - delivery_configurations
+      - duration_seconds
+      - has_active_attempt
+      - instructions
+      - maximum_marks
+      - paper
+      - published_version_id
+      - version_number
+    LearnerPaperList:
+      type: object
+      description: Learner catalogue listing item serializer.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          description: Normalized unique identification code.
+          maxLength: 100
+        paper_type:
+          $ref: '#/components/schemas/PaperTypeEnum'
+        description:
+          type: string
+        curriculum_version_name:
+          type: string
+          readOnly: true
+        curriculum_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - curriculum_name
+      - curriculum_version_name
+      - id
+      - title
+    LearnerPaperSection:
+      type: object
+      description: Section structure within a live attempt delivery payload.
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        code:
+          type: string
+        sequence:
+          type: integer
+        allowed_question_count:
+          type: integer
+          nullable: true
+        questions:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+      required:
+      - allowed_question_count
+      - code
+      - id
+      - questions
+      - sequence
+      - title
+    LearnerQuestion:
+      type: object
+      description: |-
+        Learner-safe serializer for question bank search and practice discovery.
+        STRICT SECURITY BOUNDARY: Excludes all protected answer key and solution data
+        (correct_option_id, solution_text, explanation, hint) prior to submission.
+        Also excludes internal authoring, fingerprint, lifecycle status, and provenance metadata.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sub_topic:
+          type: integer
+          readOnly: true
+        sub_topic_name:
+          type: string
+          readOnly: true
+        chapter_name:
+          type: string
+          readOnly: true
+        subject:
+          type: string
+          readOnly: true
+        syllabus_node:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        question_text:
+          type: string
+          readOnly: true
+        options:
+          readOnly: true
+          description: 'List of option objects, e.g., [{''id'': ''A'', ''text'': ''Option
+            A''}]'
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          readOnly: true
+        target_time_seconds:
+          type: integer
+          readOnly: true
+        exam_year:
+          type: integer
+          readOnly: true
+          nullable: true
+        is_must_do_pyq:
+          type: boolean
+          readOnly: true
+        target_exam:
+          readOnly: true
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TargetExamEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        question_type:
+          allOf:
+          - $ref: '#/components/schemas/QuestionTypeEnum'
+          readOnly: true
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+        negative_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+        language_code:
+          type: string
+          readOnly: true
+        instructions:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - chapter_name
+      - created_at
+      - difficulty
+      - exam_year
+      - id
+      - instructions
+      - is_must_do_pyq
+      - language_code
+      - marks
+      - negative_marks
+      - options
+      - question_text
+      - question_type
+      - sub_topic
+      - sub_topic_name
+      - subject
+      - syllabus_node
+      - target_exam
+      - target_time_seconds
+    MediumEnum:
+      enum:
+      - ENGLISH
+      - KANNADA
+      - HINDI
+      type: string
+      description: |-
+        * `ENGLISH` - English
+        * `KANNADA` - Kannada
+        * `HINDI` - Hindi
+    MistakeVaultSummary:
+      type: object
+      description: Summary of student Mistake Vault unresolved count.
+      properties:
+        unresolved_count:
+          type: integer
+      required:
+      - unresolved_count
+    ModeEnum:
+      enum:
+      - EXAM_SIMULATION
+      - PRACTICE
+      - ASSIGNMENT
+      - REVIEW
+      type: string
+      description: |-
+        * `EXAM_SIMULATION` - Strict Exam Simulation
+        * `PRACTICE` - Flexible Practice Mode
+        * `ASSIGNMENT` - Assignment Mode
+        * `REVIEW` - Review Mode
+    MustDoPYQSummary:
+      type: object
+      description: Compact summary of must-do PYQ question.
+      properties:
+        id:
+          type: integer
+        question_text:
+          type: string
+        subject:
+          type: string
+        chapter_name:
+          type: string
+        sub_topic_name:
+          type: string
+        difficulty:
+          type: string
+        exam_year:
+          type: integer
+          nullable: true
+        target_time_seconds:
+          type: integer
+      required:
+      - chapter_name
+      - difficulty
+      - exam_year
+      - id
+      - question_text
+      - sub_topic_name
+      - subject
+      - target_time_seconds
+    NavigationModeEnum:
+      enum:
+      - FREE
+      - SEQUENTIAL
+      - SECTION_LOCKED
+      type: string
+      description: |-
+        * `FREE` - Free Question Navigation
+        * `SEQUENTIAL` - Sequential Question Navigation
+        * `SECTION_LOCKED` - Section Locked Navigation
+    NodeTypeEnum:
+      enum:
+      - UNIT
+      - CHAPTER
+      - TOPIC
+      - SUBTOPIC
+      - MODULE
+      - DOMAIN
+      - CUSTOM
+      type: string
+      description: |-
+        * `UNIT` - Unit
+        * `CHAPTER` - Chapter
+        * `TOPIC` - Topic
+        * `SUBTOPIC` - Subtopic
+        * `MODULE` - Module
+        * `DOMAIN` - Domain
+        * `CUSTOM` - Custom
+    NullEnum:
+      enum:
+      - null
+    PaginatedCurriculumList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Curriculum'
+    PaginatedEducationProviderList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EducationProvider'
+    PaginatedLearnerQuestionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearnerQuestion'
+    PaginatedQuestionAttemptDetailList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionAttemptDetail'
+    PaperQuestionAuthoring:
+      type: object
+      description: Authoring serializer for linking a canonical question into a draft
+        section.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        paper_section:
+          type: string
+          format: uuid
+          readOnly: true
+        question:
+          type: integer
+        canonical_question_text:
+          type: string
+          readOnly: true
+        canonical_question_type:
+          type: string
+          readOnly: true
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          default: 1
+        is_mandatory:
+          type: boolean
+          default: true
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        negative_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        numeric_tolerance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        correct_answer_payload:
+          nullable: true
+          description: Authoring override for multiple choice, matching, numeric range.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - canonical_question_text
+      - canonical_question_type
+      - created_at
+      - id
+      - paper_section
+      - question
+      - updated_at
+    PaperQuestionReorder:
+      type: object
+      description: Payload for reordering questions within a section.
+      properties:
+        ordered_question_ids:
+          type: array
+          items:
+            type: integer
+      required:
+      - ordered_question_ids
+    PaperRead:
+      type: object
+      description: Administrative serializer for reading Paper entities with curriculum
+        metadata.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        curriculum_version:
+          type: string
+          format: uuid
+        curriculum_version_name:
+          type: string
+          readOnly: true
+        curriculum_name:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          description: Normalized unique identification code.
+          maxLength: 100
+        paper_type:
+          $ref: '#/components/schemas/PaperTypeEnum'
+        description:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - curriculum_name
+      - curriculum_version
+      - curriculum_version_name
+      - id
+      - title
+      - updated_at
+    PaperSection:
+      type: object
+      description: Serializer for paper sections in authoring workflow.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        paper_version:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          maxLength: 50
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          default: 1
+        instructions:
+          type: string
+          default: ''
+        duration_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        allowed_question_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Optional cap on maximum answered questions permitted.
+        paper_questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaperQuestionAuthoring'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - id
+      - paper_questions
+      - paper_version
+      - title
+      - updated_at
+    PaperSectionReorder:
+      type: object
+      description: Payload for reordering sections within a version.
+      properties:
+        ordered_section_ids:
+          type: array
+          items:
+            type: integer
+      required:
+      - ordered_section_ids
+    PaperTypeEnum:
+      enum:
+      - OFFICIAL
+      - PREVIOUS_YEAR
+      - MOCK
+      - SAMPLE
+      - PRACTICE
+      - ASSIGNMENT
+      - TEACHER_CREATED
+      - GENERATED
+      - OTHER
+      type: string
+      description: |-
+        * `OFFICIAL` - Official Exam Paper
+        * `PREVIOUS_YEAR` - Previous Year Paper
+        * `MOCK` - Mock Test Paper
+        * `SAMPLE` - Sample Paper
+        * `PRACTICE` - Practice Drill Paper
+        * `ASSIGNMENT` - Assignment Paper
+        * `TEACHER_CREATED` - Teacher Created Paper
+        * `GENERATED` - Generated Paper
+        * `OTHER` - Other
+    PaperVersionRead:
+      type: object
+      description: Read serializer for PaperVersion with delivery configurations and
+        sections.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        paper:
+          type: string
+          format: uuid
+          readOnly: true
+        paper_title:
+          type: string
+          readOnly: true
+        version_number:
+          type: integer
+          readOnly: true
+          default: 1
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaperVersionReadStatusEnum'
+          readOnly: true
+        duration_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Total allocated paper duration in seconds.
+        maximum_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          readOnly: true
+        instructions:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        delivery_configurations:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryConfiguration'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - created_by
+      - delivery_configurations
+      - id
+      - maximum_marks
+      - paper
+      - paper_title
+      - published_at
+      - status
+      - updated_at
+      - version_number
+    PaperVersionReadStatusEnum:
+      enum:
+      - DRAFT
+      - UNDER_REVIEW
+      - APPROVED
+      - PUBLISHED
+      - RETIRED
+      - ARCHIVED
+      type: string
+      description: |-
+        * `DRAFT` - Draft
+        * `UNDER_REVIEW` - Under Review
+        * `APPROVED` - Approved
+        * `PUBLISHED` - Published
+        * `RETIRED` - Retired
+        * `ARCHIVED` - Archived
+    PaperVersionWrite:
+      type: object
+      description: Write serializer for creating/updating paper versions.
+      properties:
+        duration_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          default: 10800
+          description: Total allocated paper duration in seconds.
+        instructions:
+          type: string
+          default: ''
+    PaperWrite:
+      type: object
+      description: Administrative serializer for creating and editing Paper entities.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        curriculum_version:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          description: Normalized unique identification code.
+          maxLength: 100
+        paper_type:
+          allOf:
+          - $ref: '#/components/schemas/PaperTypeEnum'
+          default: MOCK
+        description:
+          type: string
+          default: ''
+        is_active:
+          type: boolean
+          default: true
+      required:
+      - code
+      - curriculum_version
+      - id
+      - title
+    PatchedCanonicalQuestionCreate:
+      type: object
+      description: Serializer for creating a new canonical question draft through
+        QuestionService.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sub_topic:
+          type: integer
+        syllabus_node:
+          type: string
+          format: uuid
+          nullable: true
+        question_text:
+          type: string
+        options:
+          description: 'List of option objects, e.g., [{''id'': ''A'', ''text'': ''Option
+            A''}]'
+        correct_option_id:
+          type: string
+          maxLength: 50
+        question_type:
+          allOf:
+          - $ref: '#/components/schemas/QuestionTypeEnum'
+          default: SINGLE_CHOICE
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          default: MEDIUM
+        target_time_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          default: 120
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          default: '4.00'
+        negative_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          default: '1.00'
+        language_code:
+          type: string
+          default: en
+          maxLength: 10
+        instructions:
+          type: string
+        explanation:
+          type: string
+        hint:
+          type: string
+        source_type:
+          allOf:
+          - $ref: '#/components/schemas/SourceTypeEnum'
+          default: MANUAL
+        source_name:
+          type: string
+          maxLength: 255
+        source_authority:
+          type: string
+          maxLength: 100
+        source_reference:
+          type: string
+          maxLength: 255
+        source_url:
+          nullable: true
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        exam_year:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        is_must_do_pyq:
+          type: boolean
+        target_exam:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TargetExamEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusCd9Enum'
+          readOnly: true
+        fingerprint:
+          type: string
+          readOnly: true
+          description: SHA-256 hex fingerprint of normalized educational core identity.
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedDeliveryConfiguration:
+      type: object
+      description: Serializer for managing delivery configurations.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        paper_version:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        mode:
+          allOf:
+          - $ref: '#/components/schemas/ModeEnum'
+          default: EXAM_SIMULATION
+        is_default:
+          type: boolean
+          default: false
+        is_active:
+          type: boolean
+          default: true
+        time_limit_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        auto_submit_on_timeout:
+          type: boolean
+          default: true
+        navigation_mode:
+          allOf:
+          - $ref: '#/components/schemas/NavigationModeEnum'
+          default: FREE
+        allow_question_skipping:
+          type: boolean
+          default: true
+        allow_answer_change:
+          type: boolean
+          default: true
+        allow_clear_response:
+          type: boolean
+          default: true
+        allow_mark_for_review:
+          type: boolean
+          default: true
+        show_question_palette:
+          type: boolean
+          default: true
+        solution_release_policy:
+          allOf:
+          - $ref: '#/components/schemas/SolutionReleasePolicyEnum'
+          default: AFTER_PAPER_SUBMISSION
+        result_release_policy:
+          allOf:
+          - $ref: '#/components/schemas/ResultReleasePolicyEnum'
+          default: IMMEDIATE_ON_SUBMISSION
+        show_score_after_submission:
+          type: boolean
+          default: true
+        show_correct_answers_after_submission:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPaperQuestionAuthoring:
+      type: object
+      description: Authoring serializer for linking a canonical question into a draft
+        section.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        paper_section:
+          type: string
+          format: uuid
+          readOnly: true
+        question:
+          type: integer
+        canonical_question_text:
+          type: string
+          readOnly: true
+        canonical_question_type:
+          type: string
+          readOnly: true
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          default: 1
+        is_mandatory:
+          type: boolean
+          default: true
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        negative_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        numeric_tolerance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        correct_answer_payload:
+          nullable: true
+          description: Authoring override for multiple choice, matching, numeric range.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPaperSection:
+      type: object
+      description: Serializer for paper sections in authoring workflow.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        paper_version:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          maxLength: 50
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          default: 1
+        instructions:
+          type: string
+          default: ''
+        duration_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        allowed_question_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Optional cap on maximum answered questions permitted.
+        paper_questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaperQuestionAuthoring'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPaperVersionWrite:
+      type: object
+      description: Write serializer for creating/updating paper versions.
+      properties:
+        duration_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          default: 10800
+          description: Total allocated paper duration in seconds.
+        instructions:
+          type: string
+          default: ''
+    PatchedPaperWrite:
+      type: object
+      description: Administrative serializer for creating and editing Paper entities.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        curriculum_version:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          description: Normalized unique identification code.
+          maxLength: 100
+        paper_type:
+          allOf:
+          - $ref: '#/components/schemas/PaperTypeEnum'
+          default: MOCK
+        description:
+          type: string
+          default: ''
+        is_active:
+          type: boolean
+          default: true
+    PatchedSetPrimaryCurriculumVersionRequest:
+      type: object
+      properties:
+        curriculum_version_id:
+          type: string
+          format: uuid
+    PatchedSyllabusNode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        curriculum_subject_id:
+          type: string
+          format: uuid
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+        node_type:
+          $ref: '#/components/schemas/NodeTypeEnum'
+        title:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedUserProfile:
+      type: object
+      description: Serializer for reading and updating user target goals, medium,
+        and profile metrics.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        target_exam:
+          $ref: '#/components/schemas/TargetExamEnum'
+        medium:
+          $ref: '#/components/schemas/MediumEnum'
+        target_year:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        target_score_goal:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        login_streak_days:
+          type: integer
+          readOnly: true
+        last_active_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+    PersonalizedFeedResponse:
+      type: object
+      description: Personalized practice feed response contract.
+      properties:
+        recommended_drills:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecommendedDrill'
+        must_do_pyqs:
+          type: array
+          items:
+            $ref: '#/components/schemas/MustDoPYQSummary'
+        mistake_vault_summary:
+          $ref: '#/components/schemas/MistakeVaultSummary'
+        syllabus_completion:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyllabusCompletionItem'
+      required:
+      - mistake_vault_summary
+      - must_do_pyqs
+      - recommended_drills
+      - syllabus_completion
+    ProviderTypeEnum:
+      enum:
+      - GOVERNMENT
+      - SCHOOL_BOARD
+      - EXAM_AUTHORITY
+      - UNIVERSITY
+      - CERTIFICATION_BODY
+      - CORPORATE
+      - OTHER
+      type: string
+      description: |-
+        * `GOVERNMENT` - Government
+        * `SCHOOL_BOARD` - School Board
+        * `EXAM_AUTHORITY` - Exam Authority
+        * `UNIVERSITY` - University
+        * `CERTIFICATION_BODY` - Certification Body
+        * `CORPORATE` - Corporate
+        * `OTHER` - Other
+    Question:
+      type: object
+      description: Serializer for questions with sub-topic, chapter, subject, and
+        canonical metadata.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sub_topic:
+          type: integer
+        sub_topic_name:
+          type: string
+          readOnly: true
+        chapter_name:
+          type: string
+          readOnly: true
+        subject:
+          type: string
+          readOnly: true
+        syllabus_node:
+          type: string
+          format: uuid
+          nullable: true
+        question_text:
+          type: string
+        solution_text:
+          type: string
+        options:
+          description: 'List of option objects, e.g., [{''id'': ''A'', ''text'': ''Option
+            A''}]'
+        correct_option_id:
+          type: string
+          maxLength: 50
+        difficulty:
+          $ref: '#/components/schemas/DifficultyEnum'
+        target_time_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        exam_year:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        is_must_do_pyq:
+          type: boolean
+        target_exam:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TargetExamEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        fingerprint:
+          type: string
+          readOnly: true
+          description: SHA-256 hex fingerprint of normalized educational core identity.
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusCd9Enum'
+          readOnly: true
+        question_type:
+          $ref: '#/components/schemas/QuestionTypeEnum'
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        negative_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        language_code:
+          type: string
+          maxLength: 10
+        instructions:
+          type: string
+        explanation:
+          type: string
+        hint:
+          type: string
+        source_type:
+          $ref: '#/components/schemas/SourceTypeEnum'
+        source_name:
+          type: string
+          maxLength: 255
+        source_authority:
+          type: string
+          maxLength: 100
+        source_reference:
+          type: string
+          maxLength: 255
+        source_url:
+          nullable: true
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_by_username:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - chapter_name
+      - correct_option_id
+      - created_at
+      - created_by
+      - created_by_username
+      - fingerprint
+      - id
+      - question_text
+      - status
+      - sub_topic
+      - sub_topic_name
+      - subject
+    QuestionAttemptCreate:
+      type: object
+      description: Serializer for ingesting student attempt telemetry and updating
+        topic mastery.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        question:
+          type: integer
+        selected_option_id:
+          type: string
+          maxLength: 50
+        time_spent_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          default: 0
+        error_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ErrorTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        is_bookmarked:
+          type: boolean
+          default: false
+      required:
+      - id
+      - question
+      - selected_option_id
+    QuestionAttemptDetail:
+      type: object
+      description: Read-only serializer for performance review and the Mistake Vault.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        question:
+          type: integer
+        question_details:
+          allOf:
+          - $ref: '#/components/schemas/Question'
+          readOnly: true
+        selected_option_id:
+          type: string
+          maxLength: 50
+        is_correct:
+          type: boolean
+        time_spent_seconds:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        error_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ErrorTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        is_bookmarked:
+          type: boolean
+        is_in_mistake_vault:
+          type: boolean
+        is_resolved:
+          type: boolean
+        attempted_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - attempted_at
+      - id
+      - question
+      - question_details
+      - selected_option_id
+    QuestionTypeEnum:
+      enum:
+      - SINGLE_CHOICE
+      - MULTIPLE_CHOICE
+      - TRUE_FALSE
+      - INTEGER
+      - NUMERIC
+      - SHORT_ANSWER
+      - LONG_ANSWER
+      - MATCHING
+      - ASSERTION_REASON
+      - CASE_BASED
+      - COMPREHENSION
+      - OTHER
+      type: string
+      description: |-
+        * `SINGLE_CHOICE` - Single Choice
+        * `MULTIPLE_CHOICE` - Multiple Choice
+        * `TRUE_FALSE` - True/False
+        * `INTEGER` - Integer
+        * `NUMERIC` - Numeric
+        * `SHORT_ANSWER` - Short Answer
+        * `LONG_ANSWER` - Long Answer
+        * `MATCHING` - Matching
+        * `ASSERTION_REASON` - Assertion Reason
+        * `CASE_BASED` - Case Based
+        * `COMPREHENSION` - Comprehension
+        * `OTHER` - Other
+    RecommendedDrill:
+      type: object
+      description: Personalized subtopic practice drill recommendation.
+      properties:
+        subtopic_id:
+          type: integer
+        subtopic_name:
+          type: string
+        subject:
+          type: string
+        reason:
+          type: string
+          description: LOW_ACCURACY or UNPRACTICED
+        attempt_count:
+          type: integer
+        correct_count:
+          type: integer
+        accuracy_percentage:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - accuracy_percentage
+      - attempt_count
+      - correct_count
+      - reason
+      - subject
+      - subtopic_id
+      - subtopic_name
+    RegistrationResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        tokens:
+          $ref: '#/components/schemas/TokenPair'
+      required:
+      - tokens
+      - user
+    ResultReleasePolicyEnum:
+      enum:
+      - IMMEDIATE_ON_SUBMISSION
+      - AFTER_EXAM_WINDOW
+      - MANUAL_RELEASE
+      type: string
+      description: |-
+        * `IMMEDIATE_ON_SUBMISSION` - Immediate On Submission
+        * `AFTER_EXAM_WINDOW` - After Exam Window Closes
+        * `MANUAL_RELEASE` - Manual Administrative Release
+    ReviewQuestionItem:
+      type: object
+      description: Policy-aware review question item serializer.
+      properties:
+        snapshot_id:
+          type: string
+          format: uuid
+        section_id:
+          type: string
+          format: uuid
+        sequence:
+          type: integer
+        question_text:
+          type: string
+        options:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        question_type:
+          type: string
+        marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        negative_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        response_payload:
+          type: object
+          additionalProperties: {}
+        state:
+          type: string
+        solution_available:
+          type: boolean
+        correct_answer_available:
+          type: boolean
+        hint_available:
+          type: boolean
+        correct_option_id:
+          type: string
+          nullable: true
+        correct_answer_payload:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        solution_text:
+          type: string
+          nullable: true
+        explanation:
+          type: string
+          nullable: true
+        hint:
+          type: string
+          nullable: true
+        is_correct:
+          type: boolean
+          nullable: true
+        awarded_marks:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          nullable: true
+      required:
+      - correct_answer_available
+      - hint_available
+      - marks
+      - negative_marks
+      - options
+      - question_text
+      - question_type
+      - response_payload
+      - section_id
+      - sequence
+      - snapshot_id
+      - solution_available
+      - state
+    RoleEnum:
+      enum:
+      - STUDENT
+      - TEACHER
+      - PROFESSIONAL
+      - ADMIN
+      type: string
+      description: |-
+        * `STUDENT` - Student
+        * `TEACHER` - Teacher
+        * `PROFESSIONAL` - Professional
+        * `ADMIN` - Admin
+    SaveResponseRequest:
+      type: object
+      description: Request payload for saving a question response.
+      properties:
+        response_payload:
+          type: object
+          additionalProperties: {}
+      required:
+      - response_payload
+    SolutionReleasePolicyEnum:
+      enum:
+      - NEVER
+      - AFTER_QUESTION_SUBMISSION
+      - AFTER_PAPER_SUBMISSION
+      - AFTER_RESULT_RELEASE
+      type: string
+      description: |-
+        * `NEVER` - Never Disclose Solutions
+        * `AFTER_QUESTION_SUBMISSION` - After Individual Question Submission
+        * `AFTER_PAPER_SUBMISSION` - After Paper Submission
+        * `AFTER_RESULT_RELEASE` - After Official Result Release
+    SourceTypeEnum:
+      enum:
+      - MANUAL
+      - PREVIOUS_YEAR_PAPER
+      - IMPORT
+      - INTERNAL
+      - PARTNER
+      - AI_GENERATED
+      - OTHER
+      type: string
+      description: |-
+        * `MANUAL` - Manual Entry
+        * `PREVIOUS_YEAR_PAPER` - Previous Year Paper
+        * `IMPORT` - Bulk Import
+        * `INTERNAL` - Internal Authoring
+        * `PARTNER` - Partner Content
+        * `AI_GENERATED` - AI Generated
+        * `OTHER` - Other
+    SpeedDistribution:
+      type: object
+      description: Categorized count of attempt solve speeds.
+      properties:
+        RUSHED:
+          type: integer
+        FAST:
+          type: integer
+        OPTIMAL:
+          type: integer
+        SLOW:
+          type: integer
+        UNAVAILABLE:
+          type: integer
+      required:
+      - FAST
+      - OPTIMAL
+      - RUSHED
+      - SLOW
+      - UNAVAILABLE
+    StartAttemptRequest:
+      type: object
+      description: Request payload for starting a paper attempt.
+      properties:
+        delivery_configuration_id:
+          type: string
+          format: uuid
+          nullable: true
+    StatusCd9Enum:
+      enum:
+      - DRAFT
+      - UNDER_REVIEW
+      - CHANGES_REQUESTED
+      - APPROVED
+      - PUBLISHED
+      - REJECTED
+      - RETIRED
+      - ARCHIVED
+      type: string
+      description: |-
+        * `DRAFT` - Draft
+        * `UNDER_REVIEW` - Under Review
+        * `CHANGES_REQUESTED` - Changes Requested
+        * `APPROVED` - Approved
+        * `PUBLISHED` - Published
+        * `REJECTED` - Rejected
+        * `RETIRED` - Retired
+        * `ARCHIVED` - Archived
+    SubTopic:
+      type: object
+      description: Serializer for syllabus sub-topics.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          nullable: true
+          maxLength: 50
+      required:
+      - id
+      - name
+    Subject:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          description: Stable unique subject identification code.
+          maxLength: 100
+        description:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - id
+      - name
+      - updated_at
+    SubjectAnalyticsItem:
+      type: object
+      description: Analytics breakdown item for a subject.
+      properties:
+        subject:
+          type: string
+        total_attempts:
+          type: integer
+        unique_questions_attempted:
+          type: integer
+        correct_attempts:
+          type: integer
+        incorrect_attempts:
+          type: integer
+        accuracy_percentage:
+          type: number
+          format: double
+        average_actual_seconds:
+          type: number
+          format: double
+          nullable: true
+        average_target_seconds:
+          type: number
+          format: double
+          nullable: true
+        average_speed_ratio:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - accuracy_percentage
+      - average_actual_seconds
+      - average_speed_ratio
+      - average_target_seconds
+      - correct_attempts
+      - incorrect_attempts
+      - subject
+      - total_attempts
+      - unique_questions_attempted
+    SubjectEnum:
+      enum:
+      - PHYSICS
+      - CHEMISTRY
+      - MATHEMATICS
+      - BIOLOGY
+      type: string
+      description: |-
+        * `PHYSICS` - Physics
+        * `CHEMISTRY` - Chemistry
+        * `MATHEMATICS` - Mathematics
+        * `BIOLOGY` - Biology
+    SubtopicAnalyticsItem:
+      type: object
+      description: Analytics breakdown item for a subtopic.
+      properties:
+        subtopic_id:
+          type: integer
+        subtopic_name:
+          type: string
+        subject:
+          type: string
+        total_attempts:
+          type: integer
+        unique_questions_attempted:
+          type: integer
+        correct_attempts:
+          type: integer
+        incorrect_attempts:
+          type: integer
+        accuracy_percentage:
+          type: number
+          format: double
+        average_actual_seconds:
+          type: number
+          format: double
+          nullable: true
+        average_target_seconds:
+          type: number
+          format: double
+          nullable: true
+        average_speed_ratio:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - accuracy_percentage
+      - average_actual_seconds
+      - average_speed_ratio
+      - average_target_seconds
+      - correct_attempts
+      - incorrect_attempts
+      - subject
+      - subtopic_id
+      - subtopic_name
+      - total_attempts
+      - unique_questions_attempted
+    SwitchActiveContextRequest:
+      type: object
+      properties:
+        curriculum_version_id:
+          type: string
+          format: uuid
+      required:
+      - curriculum_version_id
+    SyllabusCompletionItem:
+      type: object
+      description: Subject-wise syllabus completion metric based on distinct attempted
+        questions.
+      properties:
+        subject:
+          type: string
+        total_questions:
+          type: integer
+        attempted_questions:
+          type: integer
+        completion_percentage:
+          type: number
+          format: double
+      required:
+      - attempted_questions
+      - completion_percentage
+      - subject
+      - total_questions
+    SyllabusNode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        curriculum_subject_id:
+          type: string
+          format: uuid
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+        node_type:
+          $ref: '#/components/schemas/NodeTypeEnum'
+        title:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - curriculum_subject_id
+      - id
+      - node_type
+      - title
+      - updated_at
+    SyllabusNodeTree:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        curriculum_subject_id:
+          type: string
+          format: uuid
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+        node_type:
+          $ref: '#/components/schemas/NodeTypeEnum'
+        title:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        sequence:
+          type: integer
+        is_active:
+          type: boolean
+        children:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - children
+      - code
+      - curriculum_subject_id
+      - description
+      - id
+      - is_active
+      - node_type
+      - parent_id
+      - sequence
+      - title
+    TargetExamEnum:
+      enum:
+      - NEET
+      - JEE_MAIN
+      - JEE_ADVANCED
+      - CBSE_10
+      - CBSE_12
+      - KARNATAKA_KCET
+      - OTHER
+      type: string
+      description: |-
+        * `NEET` - NEET
+        * `JEE_MAIN` - JEE Main
+        * `JEE_ADVANCED` - JEE Advanced
+        * `CBSE_10` - CBSE Class 10
+        * `CBSE_12` - CBSE Class 12
+        * `KARNATAKA_KCET` - Karnataka KCET
+        * `OTHER` - Other
+    TokenObtainResponse:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenPair:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+    TokenVerify:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+      required:
+      - token
+    UserProfile:
+      type: object
+      description: Serializer for reading and updating user target goals, medium,
+        and profile metrics.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        target_exam:
+          $ref: '#/components/schemas/TargetExamEnum'
+        medium:
+          $ref: '#/components/schemas/MediumEnum'
+        target_year:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        target_score_goal:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        login_streak_days:
+          type: integer
+          readOnly: true
+        last_active_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - email
+      - id
+      - last_active_at
+      - login_streak_days
+      - role
+      - username
+    UserRegistration:
+      type: object
+      description: Serializer for user registration with role default and password
+        validation.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          default: STUDENT
+        phone_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        target_exam:
+          allOf:
+          - $ref: '#/components/schemas/TargetExamEnum'
+          default: NEET
+        medium:
+          allOf:
+          - $ref: '#/components/schemas/MediumEnum'
+          default: ENGLISH
+        target_year:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        target_score_goal:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+      required:
+      - email
+      - id
+      - password
+      - username
+    UserTopicMastery:
+      type: object
+      description: Serializer for sub-topic topic mastery metrics for diagnostic AI
+        reports.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sub_topic:
+          type: integer
+        sub_topic_name:
+          type: string
+          readOnly: true
+        chapter_name:
+          type: string
+          readOnly: true
+        subject:
+          type: string
+          readOnly: true
+        total_attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        correct_attempts:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        accuracy_percentage:
+          type: number
+          format: double
+        last_updated:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - chapter_name
+      - id
+      - last_updated
+      - sub_topic
+      - sub_topic_name
+      - subject
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

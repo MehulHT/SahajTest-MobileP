@@ -1,0 +1,3 @@
+import { render } from '@testing-library/react-native';
+import { AppText } from '../app-text'; import { Screen } from '../screen'; import { ThemeProvider } from '../../theme';
+describe('Screen', () => { it('renders a safe-area-aware themed canvas', async () => { const screen = await render(<ThemeProvider><Screen testID="screen"><AppText>Foundation</AppText></Screen></ThemeProvider>); const root = screen.getByTestId('screen'); expect(root.props.style).toEqual(expect.arrayContaining([expect.objectContaining({ flex: 1, backgroundColor: '#F8F9FC' })])); expect(screen.getByText('Foundation')).toBeTruthy(); }); });
